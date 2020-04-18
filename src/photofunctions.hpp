@@ -2,7 +2,7 @@
 
 #define _banana_photofunctions_hpp_
 
-#include "papaya2.hpp"
+#include "src/papaya2.hpp"
 
 using namespace papaya2;
 

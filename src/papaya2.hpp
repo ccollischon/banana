@@ -7,7 +7,7 @@
 // 2018-2019 Sebastian Kapfer <sebastian.kapfer@fau.de>
 // 2019 Fabian Schaller <physik@fabian-schaller.de>
 
-#include "tools.hpp"
+#include "src/tools.hpp"
 
 namespace papaya2
 {

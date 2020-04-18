@@ -2,8 +2,8 @@
 
 #define _banana_savepng_hpp_
 
-#include <lodepng.h>
-#include <papaya2.hpp>
+#include "src/papaya2.hpp"
+#include "util/lodepng.h"
 
 void encodeOneStep(const char* filename, std::vector<unsigned char>& image, unsigned width, unsigned height) {
     //Encode the image
