@@ -1,8 +1,8 @@
 project(banana)
 cmake_minimum_required(VERSION 2.8)
 
-# put binary output in bin/ subdirectory
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# put binary output in ./ directory
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 set(LIBRARY_OUTPUT_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
@@ -41,7 +41,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} --coverage")
 set(HEADERS
     ${PROJECT_SOURCE_DIR}/src/util/lodepng.h
     ${PROJECT_SOURCE_DIR}/src/catch.hpp
-    ${PROJECT_SOURCE_DIR}/src/fitsfile.hpp
+    ${PROJECT_SOURCE_DIR}/src/util/fitsfile.hpp
     ${PROJECT_SOURCE_DIR}/src/hedgehog.hpp
     ${PROJECT_SOURCE_DIR}/src/originalBanana.hpp
     ${PROJECT_SOURCE_DIR}/src/papaya2.hpp
@@ -49,7 +49,7 @@ set(HEADERS
     ${PROJECT_SOURCE_DIR}/src/photofunctions.hpp
     ${PROJECT_SOURCE_DIR}/src/readarg.hpp
     ${PROJECT_SOURCE_DIR}/src/readdata.hpp
-    ${PROJECT_SOURCE_DIR}/src/savepng.hpp
+    ${PROJECT_SOURCE_DIR}/src/util/savepng.hpp
     ${PROJECT_SOURCE_DIR}/src/sugarsnappea.hpp
     ${PROJECT_SOURCE_DIR}/src/tools.hpp
     ${PROJECT_SOURCE_DIR}/src/vector.hpp
@@ -57,6 +57,7 @@ set(HEADERS
 
 # add source files of this module
 set(SOURCES
+    ${PROJECT_SOURCE_DIR}/src/util/savepng.cpp
     ${PROJECT_SOURCE_DIR}/src/util/lodepng.cpp
     ${PROJECT_SOURCE_DIR}/src/util/fitsfile.cpp
     ${PROJECT_SOURCE_DIR}/src/banana.cpp

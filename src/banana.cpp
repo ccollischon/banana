@@ -24,7 +24,7 @@ struct {
 #include "src/photofunctions.hpp"
 #include "util/fitsfile.hpp"
 #include "src/readdata.hpp"
-#include "src/savepng.hpp"
+#include "util/savepng.hpp"
 #include "src/originalBanana.hpp"
 #include "src/hedgehog.hpp"
 #include "src/peach.hpp"

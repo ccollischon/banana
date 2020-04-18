@@ -1,5 +1,4 @@
 #ifndef _banana_photofunctions_hpp_
-
 #define _banana_photofunctions_hpp_
 
 #include "src/papaya2.hpp"
@@ -7,7 +6,7 @@
 using namespace papaya2;
 
 template<typename PHOTO>
-void smooth_map_plus (PHOTO& infile, int squaresize, bool box = false)
+void smooth_map_plus (PHOTO& infile, int squaresize)
 {
     PHOTO original = infile;
     //infile.set_coordinates(0, 0, (infile.width()-squaresize), (infile.height()-squaresize), (infile.width()-squaresize), (infile.height()-squaresize));
@@ -17,14 +16,6 @@ void smooth_map_plus (PHOTO& infile, int squaresize, bool box = false)
     int begin1 = 0,begin2 = 0;
     int end1 = infile.height()-squaresize+1;
     int end2 = infile.width()-squaresize+1;
-    if(box)
-    {
-        std::cout << "Warning! smoothing over small window!\n";
-        begin1 = infile.height()-1373-151; // DEC
-        end1 = infile.height()-1373+151;
-        begin2 = 1682-149; //RA
-        end2 = 1682+149;
-    }
     
     int stepsize = std::max(squaresize/6,1);
     
@@ -47,7 +38,6 @@ void smooth_map_plus (PHOTO& infile, int squaresize, bool box = false)
             }
         }
         typename PHOTO::data_t newValue = count/n*sqrtarea;
-        //if(std::abs(newValue) > 1.)   std::cout << std::abs(newValue)/sqrtarea << std::endl;
         for(int kstep=0; kstep<stepsize; kstep++)
         for(int lstep=0; lstep<stepsize; lstep++)
         {

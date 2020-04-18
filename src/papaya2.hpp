@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <stdlib.h>
+#include <algorithm>
 
 // Papaya2
 // header-only library for computing 2D irreducible Minkowski tensors
@@ -103,7 +104,7 @@ struct BasicPhoto
     
     data_t const max_value()
     {
-        return *(max_element(data.begin(), data.end()));
+        return *(std::max_element(data.begin(), data.end()));
     }
     
     

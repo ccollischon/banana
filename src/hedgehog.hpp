@@ -1,7 +1,7 @@
 #ifndef _banana_hedgehog_hpp_
 
 #define _banana_hedgehog_hpp_
-// A class for statistics-related stuff
+// A class for bubble detection related stuff
 
 
 #include "src/papaya2.hpp"
@@ -50,11 +50,6 @@ std::vector<std::vector<double>> makeHedgehog(FitsFile& infileAbs, FitsFile& inf
         }
     }
     
-    //Write to file in ./results/
-    //for(uint i=0; i<lines.size(); i++)
-    //{
-    //    ofs << "line(" << lines.at(i).at(0) << "," << lines.at(i).at(1) << "," << lines.at(i).at(2) << "," << lines.at(i).at(3) << ") # line=0 0" << std::endl;
-    //}
     ofs.close();
     
     return lines;

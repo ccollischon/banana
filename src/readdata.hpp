@@ -40,7 +40,7 @@ std::vector<std::vector<double>> readTable(std::string filename, std::string onl
     return numbers;
 }
 
-    //Read table with hh:mm:ss,dd:mm:ss in ds9 format, gives result in deg, degnothms to be set when table already in deg
+ /*   //Read table with hh:mm:ss,dd:mm:ss in ds9 format, gives result in deg, degnothms to be set when table already in deg. Braucht keine Sau
 std::vector<std::vector<double>> readCoordinates(std::string filename, bool degnothms = false)
 {
     std::vector<std::vector<double> > numbers;
@@ -92,6 +92,7 @@ std::vector<std::vector<double>> readCoordinates(std::string filename, bool degn
     }
     return numbers;
 }
+*/
 
 
     //Read table with rapix,decpix in ds9 format (or any two comma-separated numbers in brackets), gives result in pixels of original lmcdata
