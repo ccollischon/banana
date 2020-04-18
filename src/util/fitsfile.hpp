@@ -32,66 +32,12 @@ struct FitsFile : papaya2::Photo
 
     inline void addnoise () { at (2,2) = 1; }
 
-    std::string giveKeyvalue(std::string name)
-    {
-        std::string content = "0";
-        auto it = std::find(WCSkeynames_here.begin(), WCSkeynames_here.end(), name);
-        if (it != WCSkeynames_here.end())
-        {
-            int pos1 = distance(WCSkeynames_here.begin(), it);
-            content = WCSvalues.at(pos1);
-            //std::cout << WCSkeynames_here.at(pos1) << " " << content << std::endl;
+    std::string giveKeyvalue(std::string name);
+    
+    void setKeyValue(std::string name, std::string newValue);
+    
 
-        }
-        return content;
-    }
-
-    void setKeyValue(std::string name, std::string newValue)
-    {
-        auto it = std::find(WCSkeynames_here.begin(), WCSkeynames_here.end(), name);
-        if (it != WCSkeynames_here.end())
-        {
-            int pos1 = distance(WCSkeynames_here.begin(), it);
-            WCSvalues.at(pos1) = newValue;
-            //std::cout << WCSkeynames_here.at(pos1) << " " << content << std::endl;
-        }
-    }
-
-    FitsFile &operator-=(FitsFile& b) //subtract two files with equal CDELT at correct sky positions
-    {
-        std::cout << "Subtracting FITS files..." << std::endl;
-        int w = std::min(numx, b.width());
-        int h = std::min(numy, b.height());
-        int CRPIX1_here = 0, CRPIX1_there = 0;
-        std::vector<std::vector<std::string>> WCS_there = b.returnWCSdata();
-
-        //Find positions of CRPIX1 in both images. Only works for equal CDELT1/2
-        auto it = std::find(WCSkeynames_here.begin(), WCSkeynames_here.end(), "CRPIX1");
-        if (it != WCSkeynames_here.end())
-        {
-            int pos1 = distance(WCSkeynames_here.begin(), it);
-            CRPIX1_here = std::stoi(WCSvalues.at(pos1));
-            std::cout << WCSkeynames_here.at(pos1) << " " << CRPIX1_here << std::endl;
-
-        }
-        it = std::find(WCS_there.at(0).begin(), WCS_there.at(0).end(), "CRPIX1");
-        if (it != WCS_there.at(0).end())
-        {
-            int pos2 = distance(WCS_there.at(0).begin(), it);
-            CRPIX1_there = std::stoi(WCS_there.at(1).at(pos2));
-            std::cout << WCS_there.at(0).at(pos2) << " " << CRPIX1_there << std::endl;
-        }
-
-        //Calculate shift between images. Only works for equal CDELT1/2
-        int shift = CRPIX1_here-CRPIX1_there;
-        //Subtract
-        for(int i=std::max(shift,0); i<w-std::max(-1*shift,0); i++)
-        for(int j=std::max(shift,0); j<h-std::max(-1*shift,0); j++)
-        {
-            at(i,j) = at(i,j)-b.at((i-shift),(j-shift));
-        }
-        return *this;
-    }
+    FitsFile &operator-=(FitsFile& b); //subtract two files with equal CDELT at correct sky positions
 
     FitsFile &operator-=(double b)
     {
@@ -106,7 +52,8 @@ struct FitsFile : papaya2::Photo
         return *this;
     }
 
-    double atCoord(double ra, double dec) //DOES NOT WORK!! TODO FIXME
+    /*
+    double atCoord(double ra, double dec) //DOES NOT WORK (probably except for CAR projection, not even closely in others)!! TODO FIXME
     //returns pixel value at given sky coordinates in deg
     {
         double value = 0;
@@ -140,8 +87,9 @@ struct FitsFile : papaya2::Photo
         value = at(pix1, pix2);
         return value;
     }
+*/
 
-    double atds9pix(double pix1, double pix2) //returns value at given pixel (ds9), accounts for shift
+    inline double atds9pix(double pix1, double pix2) //returns value at given pixel (ds9), accounts for shift
     {
         double value = 0;
         //Calculate shift between images. Only works for equal CDELT1/2
@@ -156,7 +104,7 @@ struct FitsFile : papaya2::Photo
         return value;
     }
 
-    std::vector<int> giveUnshiftedds9Coord(double pix1, double pix2) //Takes FitsFile coordinates of some shifted minkmap, returns pixel coordinate in ds9 Halpha (to be used for ds9 region files)
+    inline std::vector<int> giveUnshiftedds9Coord(double pix1, double pix2) //Takes FitsFile coordinates of some shifted minkmap, returns unshifted pixel coordinate in ds9 (to be used for ds9 region files)
     {
         double CRPIX1_here = std::stod(giveKeyvalue("CRPIX1"));
         double shift = crpix_source-CRPIX1_here;
@@ -166,7 +114,7 @@ struct FitsFile : papaya2::Photo
         return output;
     }
 
-    std::vector<int> giveShiftedCoord(double pix1, double pix2) // Takes ds9 coordinates of unshifted image and returns pixel coordinates of shifted FitsFile
+    inline std::vector<int> giveShiftedCoord(double pix1, double pix2) // Takes ds9 coordinates of unshifted image and returns pixel coordinates of shifted FitsFile
     {
         double CRPIX1_here = std::stod(giveKeyvalue("CRPIX1"));
         double shift = -(crpix_source-CRPIX1_here);
@@ -176,14 +124,14 @@ struct FitsFile : papaya2::Photo
         return output;
     }
 
-    double giveShift() //Subtract from x and add to y for going from original to shifted
+    inline double giveShift() //Subtract from x and add to y for going from original to shifted
     {
         double CRPIX1_here = std::stod(giveKeyvalue("CRPIX1"));
         double shift = crpix_source-CRPIX1_here;
         return shift;
     }
 
-    void abs()
+    inline void abs()
     {
         for(int i=1; i<numx; i++)
         	for(int j=1; j<numy; j++)

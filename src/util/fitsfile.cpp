@@ -103,6 +103,68 @@ FitsFile::FitsFile(const std::vector<std::vector<double>> &map,
     std::cout << "Converted map to FitsFile!" << std::endl;
 }
 
+std::string FitsFile::giveKeyvalue(std::string name)
+{
+	std::string content = "0";
+	auto it = std::find(WCSkeynames_here.begin(), WCSkeynames_here.end(), name);
+	if (it != WCSkeynames_here.end())
+	{
+		int pos1 = distance(WCSkeynames_here.begin(), it);
+		content = WCSvalues.at(pos1);
+		//std::cout << WCSkeynames_here.at(pos1) << " " << content << std::endl;
+
+	}
+	return content;
+}
+
+void FitsFile::setKeyValue(std::string name, std::string newValue)
+{
+	auto it = std::find(WCSkeynames_here.begin(), WCSkeynames_here.end(), name);
+	if (it != WCSkeynames_here.end())
+	{
+		int pos1 = distance(WCSkeynames_here.begin(), it);
+		WCSvalues.at(pos1) = newValue;
+		//std::cout << WCSkeynames_here.at(pos1) << " " << content << std::endl;
+	}
+}
+
+FitsFile &FitsFile::operator-=(FitsFile& b) //subtract two files with equal CDELT at correct sky positions
+{
+	std::cout << "Subtracting FITS files..." << std::endl;
+	int w = std::min(numx, b.width());
+	int h = std::min(numy, b.height());
+	int CRPIX1_here = 0, CRPIX1_there = 0;
+	std::vector<std::vector<std::string>> WCS_there = b.returnWCSdata();
+
+	//Find positions of CRPIX1 in both images. Only works for equal CDELT1/2
+	auto it = std::find(WCSkeynames_here.begin(), WCSkeynames_here.end(), "CRPIX1");
+	if (it != WCSkeynames_here.end())
+	{
+		int pos1 = distance(WCSkeynames_here.begin(), it);
+		CRPIX1_here = std::stoi(WCSvalues.at(pos1));
+		std::cout << WCSkeynames_here.at(pos1) << " " << CRPIX1_here << std::endl;
+
+	}
+	it = std::find(WCS_there.at(0).begin(), WCS_there.at(0).end(), "CRPIX1");
+	if (it != WCS_there.at(0).end())
+	{
+		int pos2 = distance(WCS_there.at(0).begin(), it);
+		CRPIX1_there = std::stoi(WCS_there.at(1).at(pos2));
+		std::cout << WCS_there.at(0).at(pos2) << " " << CRPIX1_there << std::endl;
+	}
+
+	//Calculate shift between images. Only works for equal CDELT1/2
+	int shift = CRPIX1_here-CRPIX1_there;
+	//Subtract
+	for(int i=std::max(shift,0); i<w-std::max(-1*shift,0); i++)
+	for(int j=std::max(shift,0); j<h-std::max(-1*shift,0); j++)
+	{
+		at(i,j) = at(i,j)-b.at((i-shift),(j-shift));
+	}
+	return *this;
+}
+
+
 template<typename PHOTO> //Writes one fits file from photo. Possible to write absolute value, argument, flipped image in any axis
 void writeImage(PHOTO minkmap, string filename,
         const std::vector<std::vector<string>>& WCSdata, bool absolute /*= true*/,
