@@ -4,9 +4,11 @@
 // A class for statistics-related stuff
 
 
-#include "papaya2.hpp"
-#include "fitsfile.hpp"
-#include "photofunctions.hpp"
+#include "src/papaya2.hpp"
+#include "src/photofunctions.hpp"
+#include "util/fitsfile.hpp"
+
+#include <iomanip>
 
 std::vector<std::vector<double>> makeHedgehog(FitsFile& infileAbs, FitsFile& infileArg, int smooth, double thresh, string wavelength)
 {

@@ -2,8 +2,8 @@
 
 #define _banana_originalbanana_hpp_
 
-#include "papaya2.hpp"
-#include "photofunctions.hpp"
+#include "src/papaya2.hpp"
+#include "src/photofunctions.hpp"
 
 template<typename PHOTO>
 void originalBanana(string maskfilename, PHOTO infile, string outfilename, double min_thresh, double max_thresh, double num_thresh)

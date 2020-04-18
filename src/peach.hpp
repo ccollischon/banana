@@ -2,9 +2,9 @@
 
 #define _banana_peach_hpp_
 
-#include "papaya2.hpp"
-#include "fitsfile.hpp"
-#include "photofunctions.hpp"
+#include "src/papaya2.hpp"
+#include "src/photofunctions.hpp"
+#include "util/fitsfile.hpp"
 
 void makePeach(std::vector<FitsFile>& infiles, std::string objectname, std::vector<int> smooths, string filenameA, string filenameB)
 {

@@ -6,7 +6,8 @@
 #include <fstream>
 #include <stdexcept>
 #include <vector>
-#include "vector.hpp"
+
+#include "src/vector.hpp"
 
 namespace papaya2
 {

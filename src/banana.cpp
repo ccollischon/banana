@@ -19,18 +19,21 @@ struct {
 } settings;
 
 
-#include "papaya2.hpp"
-#include "readarg.hpp"
-#include "photofunctions.hpp"
-#include "fitsfile.hpp"
-#include "readdata.hpp"
-#include "savepng.hpp"
-#include "originalBanana.hpp"
-#include "hedgehog.hpp"
-#include "peach.hpp"
-#include "sugarsnappea.hpp"
+#include "src/papaya2.hpp"
+#include "src/readarg.hpp"
+#include "src/photofunctions.hpp"
+#include "util/fitsfile.hpp"
+#include "src/readdata.hpp"
+#include "src/savepng.hpp"
+#include "src/originalBanana.hpp"
+#include "src/hedgehog.hpp"
+#include "src/peach.hpp"
+#include "src/sugarsnappea.hpp"
 #include <valarray>
 #include <sstream>
+
+#include <CCfits/CCfits>
+
 using namespace papaya2;
 
 //global
