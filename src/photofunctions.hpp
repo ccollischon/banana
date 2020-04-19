@@ -232,7 +232,7 @@ void minkowski_map_interpolated_marching_squares (complex_image *out,
     if (padded) mmap_upperright += pixdiag;
     out->set_coordinates(mmap_origin[0], mmap_origin[1], mmap_upperright[0], mmap_upperright[1], width-start-1, height-start-1);
 
-    if(s == 1)
+    if(s == 0)
     {
         for (int j = start; j < height-1; ++j)
         for (int i = start; i < width-1; ++i)
@@ -254,7 +254,7 @@ void minkowski_map_interpolated_marching_squares (complex_image *out,
             MinkowskiAccumulator minkval;
             add_interpolated_four_neighborhood (&minkval, off, pixdiag,
                 ph(i,j), ph(i,j+1), ph(i+1,j), ph(i+1,j+1), threshold);
-            if (s==0) {
+            if (s==1) {
                 (*out)(i+padded, j+padded) = minkval.euler();
                 //std::cout << minkval.euler() << std::endl;
             }
@@ -294,8 +294,8 @@ void minkowski_map_interpolated_marching_bigsquares (complex_image *out,
             add_interpolated_four_neighborhood (&minkval, off, pixdiag,
                 ph(i+k,j+l), ph(i+k,j+l+1), ph(i+k+1,j+l), ph(i+k+1,j+l+1), threshold);
         }
-        if (s==1) (*out)(i+padded, j+padded) = minkval.perimeter();
-        else if (s==0) (*out)(i+padded, j+padded) = minkval.euler();
+        if (s==0) (*out)(i+padded, j+padded) = minkval.perimeter();
+        else if (s==1) (*out)(i+padded, j+padded) = minkval.euler();
         else (*out)(i+padded, j+padded) = minkval.imt(s);
         
     }
@@ -333,8 +333,8 @@ void minkowski_map_interpolated_marching_bigcircles (complex_image *out,
                 add_interpolated_four_neighborhood (&minkval, off, pixdiag,
                     ph(i+k,j+l), ph(i+k,j+l+1), ph(i+k+1,j+l), ph(i+k+1,j+l+1), threshold);
         }
-        if (s==1) (*out)(i+padded, j+padded) = minkval.perimeter();
-        else if (s==0) (*out)(i+padded, j+padded) = minkval.euler();
+        if (s==0) (*out)(i+padded, j+padded) = minkval.perimeter();
+        else if (s==1) (*out)(i+padded, j+padded) = minkval.euler();
         else (*out)(i+padded, j+padded) = minkval.imt(s);
     }
 }

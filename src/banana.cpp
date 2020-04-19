@@ -101,8 +101,6 @@ void imageToPointPattern(FitsFile& image, int smooth, std::string name, int ENpo
 void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap, int s, bool threeD, int squaresize, bool average, int smooth, bool absolute_avg, double min_thresh, double max_thresh, int num_thresh, bool arg)
 { // make Minkowski map for given parameters
 //Get Coordinate (or other) info from infile
-    //infile.setKeyValue("CRPIX1",std::to_string(stod(infile.giveKeyvalue("CRPIX1")) - 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1)));
-    //infile.setKeyValue("CRPIX2",std::to_string(stod(infile.giveKeyvalue("CRPIX2")) + 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1)));
     std::vector<std::vector<string>> minkmap_WCSdata = infile.returnWCSdata();
 
 //Collect minkmap-results in these
@@ -141,8 +139,8 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
     if (threeD && squaresize == 2 && !average)
     {
         minkmap_WCSdata.at(0).push_back("COMMENT");
-        if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
-        else if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
+        if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
+        else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
         else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
         int i = 1;
         for (auto thresh : logspace (min_thresh, max_thresh, num_thresh, true))
@@ -167,8 +165,8 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
     else if (threeD && squaresize != 2 && smooth == 0 && !average)
     {
         minkmap_WCSdata.at(0).push_back("COMMENT");
-        if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, squaresize "+std::to_string(squaresize));
-        else if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, squaresize "+std::to_string(squaresize));
+        if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, squaresize "+std::to_string(squaresize));
+        else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, squaresize "+std::to_string(squaresize));
         else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", squaresize "+std::to_string(squaresize));
         int i = 1;
         for (auto thresh : logspace (min_thresh, max_thresh, num_thresh, true))
@@ -200,7 +198,8 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
         minkowski_map_interpolated_marching_bigcircles(&minkmap, infile, max_thresh, s, squaresize);
         
         minkmap_WCSdata.at(0).push_back("COMMENT");
-        if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, squaresize "+std::to_string(squaresize));
+        if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, squaresize "+std::to_string(squaresize));
+        else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, squaresize "+std::to_string(squaresize));
         else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", squaresize "+std::to_string(squaresize));
         minkmap_WCSdata.at(0).push_back("COMMENT");
         minkmap_WCSdata.at(1).push_back("Threshold: "+std::to_string(max_thresh));
@@ -212,7 +211,8 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
     else if (threeD && average)
     {
         minkmap_WCSdata.at(0).push_back("COMMENT");
-        if (s==1) minkmap_WCSdata.at(1).push_back("Averaged Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
+        if (s==0) minkmap_WCSdata.at(1).push_back("Averaged Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
+        else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
         else minkmap_WCSdata.at(1).push_back("Averaged Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
         int i = 1;
         for (auto thresh : logspace (min_thresh, max_thresh, num_thresh, true))
@@ -258,7 +258,8 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
         if(smooth!=0) smooth_map_plus(minkmap,smooth);
         
         minkmap_WCSdata.at(0).push_back("COMMENT");
-        if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
+        if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
+        else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
         else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
         minkmap_WCSdata.at(0).push_back("COMMENT");
         minkmap_WCSdata.at(1).push_back("Threshold: "+std::to_string(max_thresh));
@@ -312,7 +313,7 @@ void testBanana(string filename)
 
 int main (int argc, const char **argv)
 {
-    string infilename, outfilename="./results/", outminmap, histfile, histappendix, outlinedens, outpointspread;
+    string infilename, outfilename, outminmap, histfile, histappendix, outlinedens, outpointspread;
     string maskfilename, combination;
     string boxesToExcludeName = "";
     int smooth = 0, erd = 0;
@@ -687,18 +688,11 @@ int main (int argc, const char **argv)
     
     if(make_hedgehog)
     {
-        string buffer1;
-        if(wavelength == "halpha") buffer1 = "0.1_40_9";
-        else if (wavelength == "sii") buffer1 = "0.045_40_10";
-        else if (wavelength == "oiii") buffer1 = "0.1_40_9";
-        else if (wavelength == "siioverha") buffer1 = "0.1_40_9";
-        else
-        {
-            char buffer2a [40];
-            int n = sprintf(buffer2a,"%g_%g_%d",min_thresh,max_thresh,num_thresh);
-            n++;
-            buffer1 = buffer2a;
-        }
+        std::string buffer1;
+        char buffer2a [40];
+		int n = sprintf(buffer2a,"%g_%g_%d",min_thresh,max_thresh,num_thresh);
+		n++;
+		buffer1 = buffer2a;
         
         std::string path = outminmap;
         std::string filenameAarg = wavelength+"_s="+std::to_string(s)+"_arg";
@@ -762,17 +756,10 @@ int main (int argc, const char **argv)
         
         //read q_2 minkmaps for this smooth value and one higher value
         std::string buffer2;
-        if(wavelength == "halpha") buffer2 = "0.1_40_9";
-        else if (wavelength == "sii") buffer2 = "0.045_40_10";
-        else if (wavelength == "oiii") buffer2 = "0.1_40_9";
-        else if (wavelength == "siioverha") buffer2 = "0.1_40_9";
-        else
-        {
-            char buffer2a [40];
-            int n = sprintf(buffer2a,"%g_%g_%d",min_thresh,max_thresh,num_thresh);
-            n++;
-            buffer2 = buffer2a;
-        }
+		char buffer2a [40];
+		n = sprintf(buffer2a,"%g_%g_%d",min_thresh,max_thresh,num_thresh);
+		n++;
+		buffer2 = buffer2a;
         
         path = outminmap;
         std::string filenameAabs = wavelength+"_s="+std::to_string(s);
