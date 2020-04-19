@@ -6,13 +6,6 @@
 #include "../papaya2.hpp"
 #include "lodepng.h"
 
-//Example function from lodepng
-inline void encodeOneStep(const char* filename, std::vector<unsigned char>& image, unsigned width, unsigned height) {
-    //Encode the image
-    unsigned error = lodepng::encode(filename, image, width, height);
-    //if there's an error, display it
-    if(error) std::cout << "encoder error " << error << ": "<< lodepng_error_text(error) << std::endl;
-}
 
 //Example function from lodepng
 inline std::vector<unsigned char> decodeOneStep(const char* filename, unsigned &width, unsigned& height)
@@ -32,23 +25,10 @@ void PNGtoBasicPhoto(std::vector<unsigned char>& image, unsigned width, unsigned
 
 
 template<typename PHOTO>
-inline void writeColorPNG(std::string filename, PHOTO& inputR, PHOTO& inputG, PHOTO& inputB)
-{
-    std::vector<unsigned char> imageData = prepareData(inputR, inputG, inputB);
-    unsigned width = inputR.width();
-    unsigned height = inputR.height();
-    filename = filename;
-    encodeOneStep(filename.c_str(), imageData, width, height);
-}
+void writeColorPNG(std::string filename, PHOTO& inputR, PHOTO& inputG, PHOTO& inputB);
 
 template<typename PHOTO>
-inline void writeMonoPNG(std::string filename, PHOTO& input)
-{
-    std::vector<unsigned char> imageData = prepareData(input, input, input);
-    unsigned width = input.width();
-    unsigned height = input.height();
-    encodeOneStep(filename.c_str(), imageData, width, height);
-}
+void writeMonoPNG(std::string filename, PHOTO& input);
 
 
 /*

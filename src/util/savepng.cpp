@@ -3,6 +3,15 @@
 
 using namespace papaya2;
 
+
+//Example function from lodepng
+inline void encodeOneStep(const char* filename, std::vector<unsigned char>& image, unsigned width, unsigned height) {
+    //Encode the image
+    unsigned error = lodepng::encode(filename, image, width, height);
+    //if there's an error, display it
+    if(error) std::cout << "encoder error " << error << ": "<< lodepng_error_text(error) << std::endl;
+}
+
 template<typename PHOTO> //This function assumes than a logarithmic scale is the way to go
 std::vector<unsigned char> prepareData (PHOTO& inputR, PHOTO& inputG, PHOTO& inputB)
 {
@@ -69,3 +78,34 @@ void PNGtoBasicPhoto(std::vector<unsigned char>& image, unsigned width, unsigned
         }
     }
 }
+
+template<typename PHOTO>
+void writeMonoPNG(std::string filename, PHOTO& input)
+{
+    std::vector<unsigned char> imageData = prepareData(input, input, input);
+    unsigned width = input.width();
+    unsigned height = input.height();
+    encodeOneStep(filename.c_str(), imageData, width, height);
+}
+
+template // explicit instantiation
+void writeMonoPNG (std::string filename, Photo& input);
+
+template // explicit instantiation
+void writeMonoPNG (std::string filename, FitsFile& input);
+
+template<typename PHOTO>
+void writeColorPNG(std::string filename, PHOTO& inputR, PHOTO& inputG, PHOTO& inputB)
+{
+    std::vector<unsigned char> imageData = prepareData(inputR, inputG, inputB);
+    unsigned width = inputR.width();
+    unsigned height = inputR.height();
+    filename = filename;
+    encodeOneStep(filename.c_str(), imageData, width, height);
+}
+
+template // explicit instantiation
+void writeColorPNG(std::string filename, Photo& inputR, Photo& inputG, Photo& inputB);
+
+template // explicit instantiation
+void writeColorPNG(std::string filename, FitsFile& inputR, FitsFile& inputG, FitsFile& inputB);
