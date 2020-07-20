@@ -111,10 +111,11 @@ void maskBoxes(PHOTO& infile, std::vector<std::vector<double>>& boxes)
         int widthDEC = (int)boxes.at(i).at(3)+1;
         int widthRA = (int)boxes.at(i).at(2)+1;
         
-        int begin1 = infile.height()-centerDEC-widthDEC/2; // DEC
-        int end1 = infile.height()-centerDEC+widthDEC/2;
-        int begin2 = centerRA-widthRA/2; //RA
-        int end2 = centerRA+widthRA/2;
+        int begin1 = std::max(0, infile.height()-centerDEC-widthDEC/2); // DEC
+        int end1 = std::min(infile.height(),infile.height()-centerDEC+widthDEC/2);
+        int begin2 = std::max(0, centerRA-widthRA/2); //RA
+        int end2 = std::min(infile.width(),centerRA+widthRA/2);
+        
         for (int j = begin1; j < end1; j++)
         for (int k = begin2; k < end2; k++)
         {
@@ -135,10 +136,10 @@ BasicPhoto<double> getMask(PHOTO& infile, std::vector<std::vector<double>>& boxe
         int widthDEC = (int)boxes.at(i).at(3);
         int widthRA = (int)boxes.at(i).at(2);
         
-        int begin1 = infile.height()-centerDEC-widthDEC/2; // DEC
-        int end1 = infile.height()-centerDEC+widthDEC/2;
-        int begin2 = centerRA-widthRA/2; //RA
-        int end2 = centerRA+widthRA/2;
+        int begin1 = std::max(0, infile.height()-centerDEC-widthDEC/2); // DEC
+        int end1 = std::min(infile.height(),infile.height()-centerDEC+widthDEC/2);
+        int begin2 = std::max(0, centerRA-widthRA/2); //RA
+        int end2 = std::min(infile.width(),centerRA+widthRA/2);
         for (int j = std::max(0,begin1); j < end1; j++)
         for (int k = std::max(0,begin2); k < end2; k++)
         {
@@ -190,10 +191,10 @@ PHOTO cutout(PHOTO& infile, std::vector<std::vector<double>>& boxes)
         int widthDEC = (int)boxes.at(i).at(3);
         int widthRA = (int)boxes.at(i).at(2);
         
-        int begin1 = infile.height()-centerDEC-widthDEC/2; // DEC
-        int end1 = infile.height()-centerDEC+widthDEC/2;
-        int begin2 = centerRA-widthRA/2; //RA
-        int end2 = centerRA+widthRA/2;
+        int begin1 = std::max(0, infile.height()-centerDEC-widthDEC/2); // DEC
+        int end1 = std::min(infile.height(),infile.height()-centerDEC+widthDEC/2);
+        int begin2 = std::max(0, centerRA-widthRA/2); //RA
+        int end2 = std::min(infile.width(),centerRA+widthRA/2);
         
         //Find maximum width and height of image
         if(begin1 < min1) min1 = begin1;
