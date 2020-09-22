@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/256713274.svg)](https://zenodo.org/badge/latestdoi/256713274)
+
 # banana
 Tools for creating Minkowski maps, astronomical bubble detection, and related functions for FITS-files
 
