@@ -18,3 +18,9 @@ cd banana-build
 cmake ../banana
 make
 ```
+
+If a library (e.g. CCFits) is installed in a non-standard path you can add this path when calling cmake:
+
+```
+cmake -DCMAKE_CXX_FLAGS="-L /path/to/lib" ../banana
+```
