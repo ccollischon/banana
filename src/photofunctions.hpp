@@ -246,6 +246,19 @@ void minkowski_map_interpolated_marching_squares (complex_image *out,
         
         }
     }
+    else if(s == 4234)
+    {
+        for (int j = start; j < height-1; ++j)
+        for (int i = start; i < width-1; ++i)
+        {
+            vec_t off = { i * ph.pixel_width (), j * ph.pixel_height () };
+            MinkowskiAccumulator minkval;
+            add_interpolated_four_neighborhood (&minkval, off, pixdiag,
+                ph(i,j), ph(i,j+1), ph(i+1,j), ph(i+1,j+1), threshold);
+            (*out)(i+padded, j+padded) = minkval.area();
+        
+        }
+    }
     else
     {
         for (int j = start; j < height-1; ++j)

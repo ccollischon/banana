@@ -128,8 +128,12 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
     minkmap_WCSdata.at(1).push_back("Edited with banana.cpp using papaya2.hpp");
 
 
+    std::string sstring;
+    if(s==1) sstring = "_euler";
+    else if (s==4234) sstring = "_area";
+    else sstring = "_s="+ std::to_string(s);
 
-    outminmap = outminmap +  "_s="+ std::to_string(s);
+    outminmap = outminmap + sstring;
     if(arg) outminmap += "_arg";
     
 /***************************************/
@@ -141,6 +145,7 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
         minkmap_WCSdata.at(0).push_back("COMMENT");
         if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
         else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
+        else if (s==4234) minkmap_WCSdata.at(1).push_back("Minkowski map for area, smoothcount "+std::to_string(smooth));
         else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
         int i = 1;
         for (auto thresh : logspace (min_thresh, max_thresh, num_thresh, true))
@@ -167,6 +172,7 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
         minkmap_WCSdata.at(0).push_back("COMMENT");
         if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, squaresize "+std::to_string(squaresize));
         else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, squaresize "+std::to_string(squaresize));
+        else if (s==4234) minkmap_WCSdata.at(1).push_back("Minkowski map for area, smoothcount "+std::to_string(squaresize));
         else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", squaresize "+std::to_string(squaresize));
         int i = 1;
         for (auto thresh : logspace (min_thresh, max_thresh, num_thresh, true))
@@ -200,6 +206,7 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
         minkmap_WCSdata.at(0).push_back("COMMENT");
         if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, squaresize "+std::to_string(squaresize));
         else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, squaresize "+std::to_string(squaresize));
+        else if (s==4234) minkmap_WCSdata.at(1).push_back("Minkowski map for area, smoothcount "+std::to_string(squaresize));
         else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", squaresize "+std::to_string(squaresize));
         minkmap_WCSdata.at(0).push_back("COMMENT");
         minkmap_WCSdata.at(1).push_back("Threshold: "+std::to_string(max_thresh));
@@ -213,6 +220,7 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
         minkmap_WCSdata.at(0).push_back("COMMENT");
         if (s==0) minkmap_WCSdata.at(1).push_back("Averaged Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
         else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
+        else if (s==4234) minkmap_WCSdata.at(1).push_back("Minkowski map for area, smoothcount "+std::to_string(smooth));
         else minkmap_WCSdata.at(1).push_back("Averaged Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
         int i = 1;
         for (auto thresh : logspace (min_thresh, max_thresh, num_thresh, true))
@@ -260,6 +268,7 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
         minkmap_WCSdata.at(0).push_back("COMMENT");
         if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
         else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
+        else if (s==4234) minkmap_WCSdata.at(1).push_back("Minkowski map for area, smoothcount "+std::to_string(smooth));
         else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
         minkmap_WCSdata.at(0).push_back("COMMENT");
         minkmap_WCSdata.at(1).push_back("Threshold: "+std::to_string(max_thresh));
@@ -412,6 +421,14 @@ int main (int argc, const char **argv)
         else if (string (*argv) == "s")
         {
             s = read_arg <double> (argv++);
+        }
+        else if (string (*argv) == "area")
+        {
+            s = 4234; //1337 for AREA
+        }
+        else if (string (*argv) == "euler")
+        {
+            s = 1;
         }
         else if (string (*argv) == "smooth")
         {
