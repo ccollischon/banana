@@ -1,3 +1,7 @@
+The paper describing automatic bubble detection with banana can be found at https://ui.adsabs.harvard.edu/abs/2021A%26A...653A..16C/abstract
+
+This repository has been archived at zenodo: 
+
 [![DOI](https://zenodo.org/badge/256713274.svg)](https://zenodo.org/badge/latestdoi/256713274)
 
 # banana
