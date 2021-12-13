@@ -253,6 +253,14 @@ struct BasicPhoto
         return *this;
     }
     
+    BasicPhoto<data_t> abs()
+    {
+        for(int i=1; i<numx; i++)
+        	for(int j=1; j<numy; j++)
+				at(i,j) = std::abs(at(i,j));
+        return *this;
+    }
+    
 
 protected:
     int numx, numy;        // number of pixels

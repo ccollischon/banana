@@ -222,34 +222,45 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
         else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
         else if (s==4234) minkmap_WCSdata.at(1).push_back("Minkowski map for area, smoothcount "+std::to_string(smooth));
         else minkmap_WCSdata.at(1).push_back("Averaged Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
-        int i = 1;
-        for (auto thresh : logspace (min_thresh, max_thresh, num_thresh, true))
-        {
-            complex_image minkmap2;
-            minkowski_map_interpolated_marching_squares(&minkmap2, infile, thresh, s);
-            
-            minkmaps.push_back(minkmap2);
-            minkmap_WCSdata.at(0).push_back("COMMENT");
-            minkmap_WCSdata.at(1).push_back("Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh));
-            std::cout << "Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh) << std::endl;
-            i++;
-        }
 
         complex_image averagemap;
         if(absolute_avg)
         {
-            if(smooth!=0)
+            int i = 1;
+            for (auto thresh : logspace (min_thresh, max_thresh, num_thresh, true))
             {
-                std::cout << "Smoothing all layers...\n";
-                for(uint i=0;i<minkmaps.size();i++)
-                    smooth_map_plus(minkmaps.at(i),smooth);
+                complex_image minkmap2;
+                minkowski_map_interpolated_marching_squares(&minkmap2, infile, thresh, s);
+                
+                if(smooth!=0)
+                {
+                    std::cout << "Smoothing layer " << i << " ...\n";
+                    smooth_map_plus(minkmap2,smooth);
+                }
+                i==1 ? averagemap=minkmap2.abs() : averagemap+=minkmap2.abs();
+                minkmap_WCSdata.at(0).push_back("COMMENT");
+                minkmap_WCSdata.at(1).push_back("Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh));
+                std::cout << "Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh) << std::endl;
+                i++;
             }
-            averagemap = averageAbs(minkmaps);
+            averagemap/=num_thresh;
             outminmap = outminmap+"_absavg";
         }
         else
         {
-            averagemap = averagemaps(minkmaps);
+            int i = 1;
+            for (auto thresh : logspace (min_thresh, max_thresh, num_thresh, true))
+            {
+                complex_image minkmap2;
+                minkowski_map_interpolated_marching_squares(&minkmap2, infile, thresh, s);
+                
+                i==1 ? averagemap=minkmap2 : averagemap+=minkmap2;
+                minkmap_WCSdata.at(0).push_back("COMMENT");
+                minkmap_WCSdata.at(1).push_back("Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh));
+                std::cout << "Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh) << std::endl;
+                i++;
+            }
+            averagemap/=num_thresh;
             if(smooth!=0) smooth_map_plus(averagemap,smooth);
             outminmap = outminmap+"_avg";
         }
@@ -287,7 +298,7 @@ void makeRegionImages(PHOTO& infileR, PHOTO& infileG, PHOTO& infileB, string obj
 { //Create png images of objects given in objectname from photos
     std::vector<std::vector<double>> boxesToInclude = readTable(settings.objectDIR+objectname);
     if(erd) objectname = "erd_" + objectname;
-    if(monochrome) 
+    if(monochrome)
     {
         PHOTO outfile = cutout(infileR, boxesToInclude);
         writeMonoPNG(settings.pngDIR+wavelength+"_"+objectname+".png", outfile);
