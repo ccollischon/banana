@@ -141,7 +141,7 @@ struct FitsFile : papaya2::Photo
 };
 
 template<typename PHOTO> //Writes one fits file from photo. Possible to write absolute value, argument, flipped image in any axis
-void writeImage(PHOTO minkmap, std::string filename,
+void writeImage(const PHOTO& minkmap, std::string filename,
 		const std::vector<std::vector<std::string>>& WCSdata,
 		bool absolute = true, bool arg = false, bool flipY = true,
 		bool flipX = false, bool highPrec = false);

@@ -166,7 +166,7 @@ FitsFile &FitsFile::operator-=(FitsFile& b) //subtract two files with equal CDEL
 
 
 template<typename PHOTO> //Writes one fits file from photo. Possible to write absolute value, argument, flipped image in any axis
-void writeImage(PHOTO minkmap, string filename,
+void writeImage(const PHOTO& minkmap, string filename,
         const std::vector<std::vector<string>>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/)
@@ -234,19 +234,19 @@ void writeImage(PHOTO minkmap, string filename,
 }
 
 template // explicit instanciation
-void writeImage(FitsFile minkmap, string filename,
+void writeImage(const FitsFile& minkmap, string filename,
         const std::vector<std::vector<string>>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/);
 
 template // explicit instanciation
-void writeImage(papaya2::BasicPhoto<std::complex<double> > minkmap, string filename,
+void writeImage(const papaya2::BasicPhoto<std::complex<double> >& minkmap, string filename,
         const std::vector<std::vector<string>>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/);
 
 template // explicit instanciation
-void writeImage(papaya2::BasicPhoto<double> minkmap, string filename,
+void writeImage(const papaya2::BasicPhoto<double>& minkmap, string filename,
         const std::vector<std::vector<string>>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/);

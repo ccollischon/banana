@@ -102,7 +102,7 @@ struct BasicPhoto
         return *this;
     }
     
-    data_t const max_value()
+    data_t const max_value() const
     {
         return *(std::max_element(data.begin(), data.end()));
     }
