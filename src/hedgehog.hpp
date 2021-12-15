@@ -99,6 +99,7 @@ void makeLinedensity(const std::vector<std::vector<double>>& lines, int smooth, 
     }
     std::cout<< "Filling fits file with values... \n";
     //Fill into minkmap
+    #pragma omp parallel for
     for (int j = 0; j < (lineImage.height()/stepsize)-1; j++)
     for (int i = 0; i < (lineImage.width()/stepsize)-1; i++)
     {

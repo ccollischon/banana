@@ -19,7 +19,7 @@ void smooth_map_plus (PHOTO& infile, int squaresize)
     
     int stepsize = std::max(squaresize/6,1);
     
-    
+    #pragma omp parallel for
     for (int j = begin1; j < end1; j+=stepsize)
     for (int i = begin2; i < end2; i+=stepsize)
     {
@@ -235,6 +235,7 @@ void minkowski_map_interpolated_marching_squares (complex_image *out,
 
     if(s == 0)
     {
+        #pragma omp parallel for
         for (int j = start; j < height-1; ++j)
         for (int i = start; i < width-1; ++i)
         {
@@ -248,6 +249,7 @@ void minkowski_map_interpolated_marching_squares (complex_image *out,
     }
     else if(s == 4234)
     {
+        #pragma omp parallel for
         for (int j = start; j < height-1; ++j)
         for (int i = start; i < width-1; ++i)
         {
@@ -261,6 +263,7 @@ void minkowski_map_interpolated_marching_squares (complex_image *out,
     }
     else
     {
+        #pragma omp parallel for
         for (int j = start; j < height-1; ++j)
         for (int i = start; i < width-1; ++i)
         {
