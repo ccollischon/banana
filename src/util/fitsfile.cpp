@@ -57,7 +57,18 @@ FitsFile::FitsFile(const string &infilename, std::vector<string>& WCSkeynames,
             phdu.readKey(keyword, keyval);
         } catch (const CCfits::HDU::NoSuchKeyword&)
         {
-            keyval = "0.";
+            if(keyword=="RADECSYS"){ //RADECSYS and RADESYS should be equivalent
+                try {
+                    phdu.readKey("RADESYS", keyval);
+                } catch (const CCfits::HDU::NoSuchKeyword&)
+                {
+                    std::cerr<<"Warning: neither RADESYS nor RADECSYS could be determined\n";
+                    keyval = "0.";
+                }
+            }
+            else{
+                keyval = "0.";
+            }
         }
         WCSvalues.push_back(keyval);
     }
