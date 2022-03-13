@@ -1,4 +1,4 @@
-If you are using banana in a publication or presentation, please cite the following paper describing automatic bubble detection with banana: https://ui.adsabs.harvard.edu/abs/2021A%26A...653A..16C/abstract
+If you are using results from banana in a publication or presentation, please cite the following paper describing automatic bubble detection with banana: https://ui.adsabs.harvard.edu/abs/2021A%26A...653A..16C/abstract
 
 This repository has been archived at zenodo: 
 
