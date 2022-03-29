@@ -231,7 +231,16 @@ void writeImage(const PHOTO& minkmap, string filename,
         //std::cout << i << " " << WCSdata.at(0).at(i) << " " << WCSdata.at(1).at(i) << std::endl;
         if (WCSdata.at(0).at(i) != "COMMENT")
         {
-            pFits->pHDU().addKey(WCSdata.at(0).at(i), WCSdata.at(1).at(i), " ");
+            //see if field is a number, and convert if it is
+            if(WCSdata.at(1).at(i).find_first_not_of("-0123456789") == string::npos) //int
+            {
+                pFits->pHDU().addKey(WCSdata.at(0).at(i), std::stoi(WCSdata.at(1).at(i)), " ");
+            } else if (WCSdata.at(1).at(i).find_first_not_of("-0123456789.") == string::npos) //double
+            {
+                pFits->pHDU().addKey(WCSdata.at(0).at(i), std::stod(WCSdata.at(1).at(i)), " ");
+            } else {
+                pFits->pHDU().addKey(WCSdata.at(0).at(i), WCSdata.at(1).at(i), " ");
+            }
         }
         else
         {
