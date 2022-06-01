@@ -62,8 +62,8 @@ FitsFile::FitsFile(const string &infilename, std::vector<string>& WCSkeynames,
                     phdu.readKey("RADESYS", keyval);
                 } catch (const CCfits::HDU::NoSuchKeyword&)
                 {
-                    std::cerr<<"Warning: neither RADESYS nor RADECSYS could be determined\n";
-                    keyval = "0.";
+                    std::cerr<<"Warning: neither RADESYS nor RADECSYS could be determined\n Defaulting to FK5\n";
+                    keyval = "FK5";
                 }
             }
             else{
@@ -116,7 +116,7 @@ FitsFile::FitsFile(const std::vector<std::vector<double>> &map,
 
 std::string FitsFile::giveKeyvalue(std::string name)
 {
-	std::string content = "0";
+	std::string content = "error";
 	auto it = std::find(WCSkeynames_here.begin(), WCSkeynames_here.end(), name);
 	if (it != WCSkeynames_here.end())
 	{

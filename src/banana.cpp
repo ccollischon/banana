@@ -37,7 +37,7 @@ struct {
 using namespace papaya2;
 
 //global
-double crpix_source;
+double crpix_source,crpix_source2;
 
 void convertRegions(string boxname, string namename)
 {
@@ -109,17 +109,17 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
 
 //Shift coordinates by 1/2 pixel each squaresize-1/the right amount for smooth + dividing into smooth/6 pixels
     
-    if(infile.giveKeyvalue("CRPIX1")=="0")
+    if(infile.giveKeyvalue("CRPIX1")=="error")
     {
         minkmap_WCSdata.at(0).push_back("CRPIX1");
         minkmap_WCSdata.at(1).push_back(std::to_string(crpix_source - 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1)));
         minkmap_WCSdata.at(0).push_back("CRPIX2");
-        minkmap_WCSdata.at(1).push_back(std::to_string(crpix_source - 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1)));
+        minkmap_WCSdata.at(1).push_back(std::to_string(crpix_source2 - 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1)));
     }
     else
     {
-        minkmap_WCSdata.at(1).at(4) = std::to_string(stod(minkmap_WCSdata.at(1).at(4)) - 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1));
-        minkmap_WCSdata.at(1).at(5) = std::to_string(stod(minkmap_WCSdata.at(1).at(5)) + 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1));
+        minkmap_WCSdata.at(1).at(3) = std::to_string(stod(minkmap_WCSdata.at(1).at(3)) - 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1));
+        minkmap_WCSdata.at(1).at(4) = std::to_string(stod(minkmap_WCSdata.at(1).at(4)) + 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1));
     }
     minkmap_WCSdata.at(0).push_back("COMMENT");
     minkmap_WCSdata.at(1).push_back("Original file: "+infilename);
@@ -346,11 +346,12 @@ int main (int argc, const char **argv)
     double line_scale = 0.3;
     double line_thresh = 20;
     crpix_source = 0.;
+    crpix_source2 = 0.;
     int squaresize = 2;
     string wavelength = "unspecified", linesorminkmap = "linedensity", greenfile, bluefile;
     std::vector<int> smooths = {10,20,30,40,50,60,100,150,200,250,300,450};
     
-    std::vector<string> WCSkeynames = {"CTYPE1","CTYPE2","RADECSYS","EQUINOX","CRPIX1","CRPIX2","CRVAL1","CRVAL2","CDELT1","CDELT2"};
+    std::vector<string> WCSkeynames = {"CTYPE1","CTYPE2","RADECSYS","CRPIX1","CRPIX2","CRVAL1","CRVAL2","CDELT1","CDELT2"};
 
     // process command-line arguments
     for (++argv; *argv; ++argv)
@@ -613,6 +614,7 @@ int main (int argc, const char **argv)
         infile = newinfile;
     }
     crpix_source = std::stod(infile.giveKeyvalue("CRPIX1"));
+    crpix_source2 = std::stod(infile.giveKeyvalue("CRPIX2"));
 
     
     
@@ -813,6 +815,8 @@ int main (int argc, const char **argv)
         int othersmooth = smooth;
         switch (smooth)
         {
+            case 200: othersmooth = 600;
+                    break;
             case 100: othersmooth = 300;
                     break;
             case 80: othersmooth = 250;
