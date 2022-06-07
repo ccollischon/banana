@@ -22,7 +22,7 @@ std::vector<std::vector<double>> makeHedgehog(FitsFile& infileAbs, FitsFile& inf
     char buffer1 [15];
     int n = sprintf(buffer1,"_%g",thresh);
     n++;
-    std::ofstream ofs (settings.resultDIR+"angles_"+wavelength+"_smooth="+std::to_string(smooth)+"_thresh"+buffer1+"_scalelength.re");
+    std::ofstream ofs (settings.resultDIR+"angles_"+wavelength+"_smooth="+std::to_string(smooth)+"_thresh"+buffer1+"_scalelength.reg");
     ofs << "# Region file format: DS9 version 4.1 \n global color=green dashlist=8 3 width=1 font=\"helvetica 10 normal roman\" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1 \n image \n";
     
     int lineodd = 0; //helper to write only every 2nd line into region file
@@ -139,7 +139,7 @@ void bubbles(FitsFile& infile, int smooth, int thresh, string wavelength, double
     n++;
     
     //Sorted: slope of q_2 checked before approving
-    std::ofstream ofs (settings.resultDIR+"bubbles_sorted_"+wavelength+"_smooth="+std::to_string(smooth)+"_thresh"+buffer1+".re");
+    std::ofstream ofs (settings.resultDIR+"bubbles_sorted_"+wavelength+"_smooth="+std::to_string(smooth)+"_thresh"+buffer1+".reg");
     std::ofstream ofs_objectnames("bubbles_sorted_regionnames_"+wavelength+"_smooth="+std::to_string(smooth)+"_thresh"+buffer1);
     ofs << "# Region file format: DS9 version 4.1 \n global color=green dashlist=8 3 width=1 font=\"helvetica 10 normal roman\" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1 \n image \n";
     
@@ -309,7 +309,7 @@ void writeRegion(string filename, std::vector<std::vector<std::vector<double>>> 
     std::ofstream maskfile(filename);
     for(uint i=0; i<bubbles.size(); i++)
     {
-        std::ofstream ds9file (settings.resultDIR+filename+"_"+std::to_string(i)+".re");
+        std::ofstream ds9file (settings.resultDIR+filename+"_"+std::to_string(i)+".reg");
         ds9file << "# Region file format: DS9 version 4.1 \n global color=green dashlist=8 3 width=1 font=\"helvetica 10 normal roman\" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1 \n image \n";
         std::ofstream objectfile (settings.objectDIR+filename+"_"+std::to_string(i));
         maskfile << filename+"_"+std::to_string(i) << std::endl;

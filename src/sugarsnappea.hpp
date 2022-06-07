@@ -141,7 +141,7 @@ double getMeanColumn(std::vector<std::vector<double>> bubbleboxes, uint column)
 void writeBubblelist(std::vector<std::vector<std::vector<double>>> allBubbles, std::string filename)
 { //Takes complete list of bubbles, combines all info for each bubble, writes table containing only centers (R readable) and ds9-readable file containing centers and average size
     std::ofstream ofs(settings.resultDIR+"R_readable_"+filename);
-    std::ofstream ds9file(settings.resultDIR+filename+"_all.re");
+    std::ofstream ds9file(settings.resultDIR+filename+"_all.reg");
     ds9file << "# Region file format: DS9 version 4.1 \n global color=green dashlist=8 3 width=1 font=\"helvetica 10 normal roman\" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1 \n image \n";
     for(auto bubblecombo:allBubbles)
     {
