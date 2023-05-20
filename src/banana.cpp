@@ -98,7 +98,7 @@ void imageToPointPattern(FitsFile& image, int smooth, std::string name, int ENpo
 
 
 
-void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap, int s, bool threeD, int squaresize, bool average, int smooth, bool absolute_avg, double min_thresh, double max_thresh, int num_thresh, bool arg)
+void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap, int s, bool threeD, bool average, int smooth, bool absolute_avg, double min_thresh, double max_thresh, int num_thresh, bool arg)
 { // make Minkowski map for given parameters
 //Get Coordinate (or other) info from infile
     std::vector<std::vector<string>> minkmap_WCSdata = infile.returnWCSdata();
@@ -112,14 +112,14 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
     if(infile.giveKeyvalue("CRPIX1")=="error")
     {
         minkmap_WCSdata.at(0).push_back("CRPIX1");
-        minkmap_WCSdata.at(1).push_back(std::to_string(crpix_source - 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1)));
+        minkmap_WCSdata.at(1).push_back(std::to_string(crpix_source - 0.5*(std::max(2.,1.*smooth-smooth/6)-1)));
         minkmap_WCSdata.at(0).push_back("CRPIX2");
-        minkmap_WCSdata.at(1).push_back(std::to_string(crpix_source2 - 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1)));
+        minkmap_WCSdata.at(1).push_back(std::to_string(crpix_source2 - 0.5*(std::max(2.,1.*smooth-smooth/6)-1)));
     }
     else
     {
-        minkmap_WCSdata.at(1).at(3) = std::to_string(stod(minkmap_WCSdata.at(1).at(3)) - 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1));
-        minkmap_WCSdata.at(1).at(4) = std::to_string(stod(minkmap_WCSdata.at(1).at(4)) + 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1));
+        minkmap_WCSdata.at(1).at(3) = std::to_string(stod(minkmap_WCSdata.at(1).at(3)) - 0.5*(std::max(2.,1.*smooth-smooth/6)-1));
+        minkmap_WCSdata.at(1).at(4) = std::to_string(stod(minkmap_WCSdata.at(1).at(4)) + 0.5*(std::max(2.,1.*smooth-smooth/6)-1));
     }
     minkmap_WCSdata.at(0).push_back("COMMENT");
     minkmap_WCSdata.at(1).push_back("Original file: "+infilename);
@@ -140,7 +140,7 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
 //Start actual processing
 /***************************************/
 
-    if (threeD && squaresize == 2 && !average)
+    if (threeD && !average)
     {
         minkmap_WCSdata.at(0).push_back("COMMENT");
         if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
@@ -166,54 +166,6 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
         n++;
         if (smooth==0) write3Dimage(minkmaps, outminmap+"_3d"+"_thresh_"+buffer1, minkmap_WCSdata, s, arg);
         else write3Dimage(minkmaps, outminmap+"_smooth="+std::to_string(smooth)+"_3d"+"_thresh_"+buffer1, minkmap_WCSdata, s, arg);
-    }
-    else if (threeD && squaresize != 2 && smooth == 0 && !average)
-    {
-        minkmap_WCSdata.at(0).push_back("COMMENT");
-        if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, squaresize "+std::to_string(squaresize));
-        else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, squaresize "+std::to_string(squaresize));
-        else if (s==4234) minkmap_WCSdata.at(1).push_back("Minkowski map for area, smoothcount "+std::to_string(squaresize));
-        else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", squaresize "+std::to_string(squaresize));
-        int i = 1;
-        for (auto thresh : logspace (min_thresh, max_thresh, num_thresh, true))
-        {
-            complex_image minkmap2;
-            minkowski_map_interpolated_marching_bigsquares(&minkmap2, infile, thresh, s, squaresize);
-            minkmaps.push_back(minkmap2);
-            minkmap_WCSdata.at(0).push_back("COMMENT");
-            minkmap_WCSdata.at(1).push_back("Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh));
-            std::cout << "Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh) << std::endl;
-            i++;
-        }
-        char buffer1 [40];
-        int n = sprintf(buffer1,"%g_%g_%d",min_thresh,max_thresh,num_thresh);
-        n++;
-        
-        complex_image averagemap;
-        if(average)
-        {
-            averagemap = averagemaps(minkmaps);
-            outminmap = outminmap+"_avg";
-            writeImage(averagemap, outminmap+"_squaresize="+std::to_string(smooth)+"_thresh_"+buffer1, minkmap_WCSdata, s, arg);
-        }
-        else write3Dimage(minkmaps, outminmap+"_squaresize="+std::to_string(squaresize)+"_3d"+"_thresh_"+buffer1, minkmap_WCSdata, s, arg);
-    }
-    else if (!threeD && squaresize != 2)
-    {
-        
-        minkowski_map_interpolated_marching_bigcircles(&minkmap, infile, max_thresh, s, squaresize);
-        
-        minkmap_WCSdata.at(0).push_back("COMMENT");
-        if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, squaresize "+std::to_string(squaresize));
-        else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, squaresize "+std::to_string(squaresize));
-        else if (s==4234) minkmap_WCSdata.at(1).push_back("Minkowski map for area, smoothcount "+std::to_string(squaresize));
-        else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", squaresize "+std::to_string(squaresize));
-        minkmap_WCSdata.at(0).push_back("COMMENT");
-        minkmap_WCSdata.at(1).push_back("Threshold: "+std::to_string(max_thresh));
-        char buffer1 [15];
-        int n = sprintf(buffer1,"%g",max_thresh);
-        n++;
-        writeImage(minkmap, outminmap+"_squaresize="+std::to_string(squaresize)+"_thresh_"+buffer1, minkmap_WCSdata, s, arg);
     }
     else if (threeD && average)
     {
@@ -347,7 +299,6 @@ int main (int argc, const char **argv)
     double line_thresh = 20;
     crpix_source = 0.;
     crpix_source2 = 0.;
-    int squaresize = 2;
     string wavelength = "unspecified", linesorminkmap = "linedensity", greenfile, bluefile;
     std::vector<int> smooths = {10,20,30,40,50,60,100,150,200,250,300,450};
     
@@ -570,12 +521,6 @@ int main (int argc, const char **argv)
         }
     }
     
-    if (smooth!=0 && squaresize != 2)
-    {
-        std::cout << "Change either squaresize or smooth, not both" << std::endl;
-        return 1;
-    }
-
     
     
     
@@ -697,8 +642,8 @@ int main (int argc, const char **argv)
             //smooth and get shift in coordinates right
             smooth_map_plus(image,smooth);
             std::vector<std::vector<string>> minkmap_WCSdata = infile.returnWCSdata();
-            image.setKeyValue("CRPIX1",std::to_string(stod(image.giveKeyvalue("CRPIX1")) - 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1)));
-            image.setKeyValue("CRPIX2",std::to_string(stod(image.giveKeyvalue("CRPIX2")) + 0.5*(std::max(1.*squaresize,1.*smooth-smooth/6)-1)));
+            image.setKeyValue("CRPIX1",std::to_string(stod(image.giveKeyvalue("CRPIX1")) - 0.5*(std::max(2.,1.*smooth-smooth/6)-1)));
+            image.setKeyValue("CRPIX2",std::to_string(stod(image.giveKeyvalue("CRPIX2")) + 0.5*(std::max(2.,1.*smooth-smooth/6)-1)));
             
             filenameWithoutFits += "_smooth_"+std::to_string(smooth);
         }
@@ -750,7 +695,7 @@ int main (int argc, const char **argv)
             absImage = new FitsFile(filename, WCSkeynames);
         } catch(const CCfits::FITS::CantOpen&) {
             std::cout << "Minkmap doesn't exist. Make new one...\n";
-            makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, squaresize, average, smooth, absolute_avg, min_thresh, max_thresh, num_thresh, false);
+            makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, average, smooth, absolute_avg, min_thresh, max_thresh, num_thresh, false);
             absImage = new FitsFile(filename, WCSkeynames);
         }
         filename = path + filenameAarg + std::to_string(smooth) + filenameB + ".fits";
@@ -758,7 +703,7 @@ int main (int argc, const char **argv)
             argImage = new FitsFile(filename, WCSkeynames);
         } catch(const CCfits::FITS::CantOpen&) {
             std::cout << "Minkmap doesn't exist. Make new one...\n";
-            makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, squaresize, average, smooth, absolute_avg, min_thresh, max_thresh, num_thresh, true);
+            makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, average, smooth, absolute_avg, min_thresh, max_thresh, num_thresh, true);
             argImage = new FitsFile(filename, WCSkeynames);
         }
         
@@ -844,8 +789,8 @@ int main (int argc, const char **argv)
             smoothB = new FitsFile(filenameS, WCSkeynames);
         } catch(const CCfits::FITS::CantOpen&) {
             std::cout << "Minkmap doesn't exist. Make new one...\n";
-            makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, squaresize, average, othersmooth, absolute_avg, min_thresh, max_thresh, num_thresh, false);
-            //makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, squaresize, average,      smooth, absolute_avg, min_thresh, max_thresh, num_thresh, arg);
+            makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, average, othersmooth, absolute_avg, min_thresh, max_thresh, num_thresh, false);
+            //makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, average,      smooth, absolute_avg, min_thresh, max_thresh, num_thresh, arg);
             smoothB = new FitsFile(filenameS, WCSkeynames);
         }
         
@@ -985,7 +930,7 @@ int main (int argc, const char **argv)
     
     if(make_minkmap)
     {
-        makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, squaresize, average, smooth, absolute_avg, min_thresh, max_thresh, num_thresh, arg);
+        makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, average, smooth, absolute_avg, min_thresh, max_thresh, num_thresh, arg);
     }
     
     if(makeBanana)
