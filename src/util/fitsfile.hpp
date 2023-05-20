@@ -52,42 +52,6 @@ struct FitsFile : papaya2::Photo
         return *this;
     }
 
-    /*
-    double atCoord(double ra, double dec) //DOES NOT WORK (probably except for CAR projection, not even closely in others)!! TODO FIXME
-    //returns pixel value at given sky coordinates in deg
-    {
-        double value = 0;
-
-        //Calculate distance to ref pixel in deg
-        double CRVAL1 = 0., CRVAL2 = 0.;
-        CRVAL1 = std::stod(giveKeyvalue("CRVAL1"));
-        CRVAL2 = std::stod(giveKeyvalue("CRVAL2"));
-        double distdeg1, distdeg2;
-        distdeg1 = ra-CRVAL1;
-        distdeg2 = dec-CRVAL2;
-        std::cout << distdeg1 << " " << distdeg2 << std::endl;
-
-        //...and in pixels
-        double CDELT1 = std::stod(giveKeyvalue("CDELT1"));
-        double CDELT2 = std::stod(giveKeyvalue("CDELT2"));
-        double distpix1, distpix2;
-        distpix1 = distdeg1/CDELT1;
-        distpix2 = distdeg2/CDELT2;
-        std::cout << distpix1 << " " << distpix2 << std::endl;
-
-        //add to ref pixel (pay attention to different y axes here and in ds9!)
-        double CRPIX1 = std::stod(giveKeyvalue("CRPIX1"));
-        double CRPIX2 = std::stod(giveKeyvalue("CRPIX2"));
-        int pix1, pix2;
-        pix1 = CRPIX1 + distpix1;
-        pix2 = CRPIX2 + distpix2;
-        std::cout << pix1 << " " << pix2 << std::endl;
-
-        //take value of pixel here and return
-        value = at(pix1, pix2);
-        return value;
-    }
-*/
 
     inline double atds9pix(double pix1, double pix2) //returns value at given pixel (ds9), accounts for shift
     {

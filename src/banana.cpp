@@ -563,10 +563,6 @@ int main (int argc, const char **argv)
         {
             WCSkeynames.push_back(read_arg <string> (argv++));
         }
-        else if (string (*argv) == "squaresize")
-        {
-            squaresize = read_arg <double> (argv++);
-        }
         else
         {
             std::cerr << "illegal argument: " << *argv << "\n";

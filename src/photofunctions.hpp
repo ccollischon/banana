@@ -102,7 +102,7 @@ PHOTO averageAbs(const std::vector<PHOTO>& datamaps)
 
 
 template<typename PHOTO>
-void maskBoxes(PHOTO& infile, std::vector<std::vector<double>>& boxes)
+void maskBoxes(PHOTO& infile, const std::vector<std::vector<double>>& boxes)
 {
     for(uint_fast8_t i=0; i<boxes.size(); i++)
     {
@@ -125,7 +125,7 @@ void maskBoxes(PHOTO& infile, std::vector<std::vector<double>>& boxes)
 }
 
 template<typename PHOTO>
-BasicPhoto<double> getMask(PHOTO& infile, std::vector<std::vector<double>>& boxes)
+BasicPhoto<double> getMask(PHOTO& infile, const std::vector<std::vector<double>>& boxes)
 {
     BasicPhoto<double> mask;
     mask.set_coordinates (0, 0, 1, 1, infile.width(), infile.height());
@@ -150,14 +150,14 @@ BasicPhoto<double> getMask(PHOTO& infile, std::vector<std::vector<double>>& boxe
 }
 
 template<typename PHOTO>
-void includeBoxes(PHOTO& infile, std::vector<std::vector<double>>& boxes)
+void includeBoxes(PHOTO& infile, const std::vector<std::vector<double>>& boxes)
 {
     BasicPhoto<double> mask = getMask(infile, boxes);
     infile *= mask;
 }
 
 template<typename PHOTO>
-double averageBoxes(PHOTO& infile, std::vector<std::vector<double>>& boxes)
+double averageBoxes(PHOTO& infile, const std::vector<std::vector<double>>& boxes)
 {
     //std::cout << "Getting mask...\n";
     BasicPhoto<double> mask = getMask(infile, boxes);
@@ -176,7 +176,7 @@ double averageBoxes(PHOTO& infile, std::vector<std::vector<double>>& boxes)
 }
 
 template<typename PHOTO>
-PHOTO cutout(PHOTO& infile, std::vector<std::vector<double>>& boxes)
+PHOTO cutout(PHOTO& infile, const std::vector<std::vector<double>>& boxes)
 {
     BasicPhoto<double> mask = getMask(infile, boxes);
     
