@@ -16,7 +16,7 @@ struct FitsFile : papaya2::Photo
 
     FitsFile (const std::string &infilename, const std::vector<std::string>& WCSkeynames, int layer = 0, unsigned hdu = 0);
 
-    FitsFile (const std::vector<std::vector<double>> &map, const std::unordered_map<std::string, std::string> &WCSdata); //Create a FitsFile from 2D-vector containing image
+    FitsFile (const std::vector<std::vector<double>> &map, std::unordered_map<std::string, std::string> WCSdata); //Create a FitsFile from 2D-vector containing image
 
     // allow overwriting pixels by the user
     inline double &at (int i, int j) { return papaya2::Photo::at (i, j); }
@@ -52,8 +52,7 @@ struct FitsFile : papaya2::Photo
     {
         double value = 0;
         //Calculate shift between images. Only works for equal CDELT1/2
-        double CRPIX1_here = std::stod(giveKeyvalue("CRPIX1"));
-        double shift = CRPIX1_here-crpix_source;//1674.4;
+        double shift = giveShift();//1674.4;
 
         //std::cout << pix1+shift << " " << pix2-shift << std::endl;
 
@@ -65,8 +64,7 @@ struct FitsFile : papaya2::Photo
 
     inline std::vector<int> giveUnshiftedds9Coord(double pix1, double pix2) //Takes FitsFile coordinates of some shifted minkmap, returns unshifted pixel coordinate in ds9 (to be used for ds9 region files)
     {
-        double CRPIX1_here = std::stod(giveKeyvalue("CRPIX1"));
-        double shift = crpix_source-CRPIX1_here;
+        double shift = giveShift();
         std::vector<int> output;
         output.push_back((int)(pix1+shift-1));
         output.push_back((int)(height()-pix2-shift));
@@ -75,8 +73,7 @@ struct FitsFile : papaya2::Photo
 
     inline std::vector<int> giveShiftedCoord(double pix1, double pix2) // Takes ds9 coordinates of unshifted image and returns pixel coordinates of shifted FitsFile
     {
-        double CRPIX1_here = std::stod(giveKeyvalue("CRPIX1"));
-        double shift = -(crpix_source-CRPIX1_here);
+        double shift = -giveShift();
         std::vector<int> output;
         output.push_back((int)(pix1+shift-1));
         output.push_back((int)(height()-pix2+shift));

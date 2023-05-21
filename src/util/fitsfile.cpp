@@ -64,8 +64,8 @@ FitsFile::FitsFile(const string &infilename, const std::vector<string>& WCSkeyna
                 }
             }
             else{
-                std::cerr << "Warning: could not read keyword: " << keyword << " Setting keyval to zero\n";
-                keyval = "0.";
+                std::cerr << "Warning: could not read keyword: " << keyword << " Setting keyval to error\n";
+                keyval = "error";
             }
         }
         WCSdata_.emplace(std::make_pair(keyword,keyval));
@@ -95,13 +95,12 @@ FitsFile::FitsFile(const string &infilename, const std::vector<string>& WCSkeyna
 }
 
 FitsFile::FitsFile(const std::vector<std::vector<double>> &map,
-        const std::unordered_map<std::string,std::string> &WCSdata) //Create a FitsFile from 2D-vector containing image
+        std::unordered_map<std::string,std::string> WCSdata) : WCSdata_{std::move(WCSdata)} //Create a FitsFile from 2D-vector containing image
 {
     std::cout << "Converting map to FitsFile...\n";
     set_coordinates(0, 0, map.size(), map.at(0).size(), map.size(),
             map.at(0).size()); //Set size
 
-    WCSdata_ = WCSdata; //Add Header data
 
     for (uint i = 0; i < map.size(); i++)
         for (uint j = 0; j < map.at(0).size(); j++)
@@ -123,15 +122,7 @@ std::string FitsFile::giveKeyvalue(const std::string& name) const
 
 void FitsFile::setKeyValue(const std::string& name, const std::string& newValue)
 {
-	auto it = WCSdata_.find(name);
-	if (it != WCSdata_.end())
-	{
-		it->second = newValue;
-	}
-	else
-    {
-        WCSdata_.emplace(std::make_pair(name,newValue));
-    }
+	WCSdata_.insert_or_assign(name,newValue);
 }
 
 FitsFile &FitsFile::operator-=(FitsFile& b) //subtract two files with equal CDELT at correct sky positions
