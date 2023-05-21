@@ -35,7 +35,7 @@ FitsFile::FitsFile(const string &infilename, int layer /*= 0*/, unsigned hdu /*=
             << max << ", min = " << min << "\n";
 }
 
-FitsFile::FitsFile(const string &infilename, std::vector<string>& WCSkeynames,
+FitsFile::FitsFile(const string &infilename, const std::vector<string>& WCSkeynames,
         int layer /*= 0*/, unsigned hdu /*= 0*/)
 {
     if (hdu != 0)
@@ -44,11 +44,8 @@ FitsFile::FitsFile(const string &infilename, std::vector<string>& WCSkeynames,
     CCfits::FITS infile(infilename.c_str(), CCfits::Read, true);
     CCfits::PHDU &phdu = infile.pHDU();
 
-    // FIXME extract proper sky coordinates from FITS and insert pixel dimensions here.
-    // for now, just map everything on the unit square
 
     std::cout << "Loading WCS data..." << std::endl;
-    WCSkeynames_here = WCSkeynames;
     for (auto keyword : WCSkeynames)
     {
         string keyval = "";
@@ -62,15 +59,16 @@ FitsFile::FitsFile(const string &infilename, std::vector<string>& WCSkeynames,
                     phdu.readKey("RADESYS", keyval);
                 } catch (const CCfits::HDU::NoSuchKeyword&)
                 {
-                    std::cerr<<"Warning: neither RADESYS nor RADECSYS could be determined\n Defaulting to FK5\n";
+                    std::cerr << "Warning: neither RADESYS nor RADECSYS could be determined\n Defaulting to FK5\n";
                     keyval = "FK5";
                 }
             }
             else{
+                std::cerr << "Warning: could not read keyword: " << keyword << " Setting keyval to zero\n";
                 keyval = "0.";
             }
         }
-        WCSvalues.push_back(keyval);
+        WCSdata_.emplace(std::make_pair(keyword,keyval));
     }
     //phdu.readKeys(WCSkeynames,WCSvalues);
 
@@ -97,14 +95,13 @@ FitsFile::FitsFile(const string &infilename, std::vector<string>& WCSkeynames,
 }
 
 FitsFile::FitsFile(const std::vector<std::vector<double>> &map,
-        const std::vector<std::vector<string>> &WCSdata) //Create a FitsFile from 2D-vector containing image
+        const std::unordered_map<std::string,std::string> &WCSdata) //Create a FitsFile from 2D-vector containing image
 {
     std::cout << "Converting map to FitsFile...\n";
     set_coordinates(0, 0, map.size(), map.at(0).size(), map.size(),
             map.at(0).size()); //Set size
 
-    WCSkeynames_here = WCSdata.at(0); //Add Header data
-    WCSvalues = WCSdata.at(1);
+    WCSdata_ = WCSdata; //Add Header data
 
     for (uint i = 0; i < map.size(); i++)
         for (uint j = 0; j < map.at(0).size(); j++)
@@ -114,29 +111,27 @@ FitsFile::FitsFile(const std::vector<std::vector<double>> &map,
     std::cout << "Converted map to FitsFile!" << std::endl;
 }
 
-std::string FitsFile::giveKeyvalue(std::string name)
+std::string FitsFile::giveKeyvalue(const std::string& name) const
 {
-	std::string content = "error";
-	auto it = std::find(WCSkeynames_here.begin(), WCSkeynames_here.end(), name);
-	if (it != WCSkeynames_here.end())
+	auto it = WCSdata_.find(name);
+	if (it != WCSdata_.end())
 	{
-		int pos1 = distance(WCSkeynames_here.begin(), it);
-		content = WCSvalues.at(pos1);
-		//std::cout << WCSkeynames_here.at(pos1) << " " << content << std::endl;
-
+		return it->second;
 	}
-	return content;
+	return "error";
 }
 
-void FitsFile::setKeyValue(std::string name, std::string newValue)
+void FitsFile::setKeyValue(const std::string& name, const std::string& newValue)
 {
-	auto it = std::find(WCSkeynames_here.begin(), WCSkeynames_here.end(), name);
-	if (it != WCSkeynames_here.end())
+	auto it = WCSdata_.find(name);
+	if (it != WCSdata_.end())
 	{
-		int pos1 = distance(WCSkeynames_here.begin(), it);
-		WCSvalues.at(pos1) = newValue;
-		//std::cout << WCSkeynames_here.at(pos1) << " " << content << std::endl;
+		it->second = newValue;
 	}
+	else
+    {
+        WCSdata_.emplace(std::make_pair(name,newValue));
+    }
 }
 
 FitsFile &FitsFile::operator-=(FitsFile& b) //subtract two files with equal CDELT at correct sky positions
@@ -145,23 +140,21 @@ FitsFile &FitsFile::operator-=(FitsFile& b) //subtract two files with equal CDEL
 	int w = std::min(numx, b.width());
 	int h = std::min(numy, b.height());
 	int CRPIX1_here = 0, CRPIX1_there = 0;
-	std::vector<std::vector<std::string>> WCS_there = b.returnWCSdata();
+	std::unordered_map<std::string, std::string> WCSdata_there = b.returnWCSdata();
 
 	//Find positions of CRPIX1 in both images. Only works for equal CDELT1/2
-	auto it = std::find(WCSkeynames_here.begin(), WCSkeynames_here.end(), "CRPIX1");
-	if (it != WCSkeynames_here.end())
+	auto it = WCSdata_.find("CRPIX1");
+	if (it != WCSdata_.end())
 	{
-		int pos1 = distance(WCSkeynames_here.begin(), it);
-		CRPIX1_here = std::stoi(WCSvalues.at(pos1));
-		std::cout << WCSkeynames_here.at(pos1) << " " << CRPIX1_here << std::endl;
+		CRPIX1_here = std::stoi(it->second);
+		std::cout << it->first << " " << CRPIX1_here << std::endl;
 
 	}
-	it = std::find(WCS_there.at(0).begin(), WCS_there.at(0).end(), "CRPIX1");
-	if (it != WCS_there.at(0).end())
+	it = WCSdata_there.find("CRPIX1");
+	if (it != WCSdata_there.end())
 	{
-		int pos2 = distance(WCS_there.at(0).begin(), it);
-		CRPIX1_there = std::stoi(WCS_there.at(1).at(pos2));
-		std::cout << WCS_there.at(0).at(pos2) << " " << CRPIX1_there << std::endl;
+		CRPIX1_there = std::stoi(it->second);
+		std::cout << it->first << " " << CRPIX1_there << std::endl;
 	}
 
 	//Calculate shift between images. Only works for equal CDELT1/2
@@ -178,7 +171,7 @@ FitsFile &FitsFile::operator-=(FitsFile& b) //subtract two files with equal CDEL
 
 template<typename PHOTO> //Writes one fits file from photo. Possible to write absolute value, argument, flipped image in any axis
 void writeImage(const PHOTO& minkmap, string filename,
-        const std::vector<std::vector<string>>& WCSdata, bool absolute /*= true*/,
+        const std::unordered_map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/)
 {
@@ -226,25 +219,25 @@ void writeImage(const PHOTO& minkmap, string filename,
     long fpixel(1);
 
     //Header information
-    for (uint i = 0; i < WCSdata.at(0).size(); i++)
+    for (const auto& element : WCSdata)
     {
         //std::cout << i << " " << WCSdata.at(0).at(i) << " " << WCSdata.at(1).at(i) << std::endl;
-        if (WCSdata.at(0).at(i) != "COMMENT")
+        if (element.first != "COMMENT")
         {
             //see if field is a number, and convert if it is
-            if(WCSdata.at(1).at(i).find_first_not_of("-0123456789") == string::npos) //int
+            if(element.second.find_first_not_of("-0123456789") == string::npos) //int
             {
-                pFits->pHDU().addKey(WCSdata.at(0).at(i), std::stoi(WCSdata.at(1).at(i)), " ");
-            } else if (WCSdata.at(1).at(i).find_first_not_of("-0123456789.") == string::npos) //double
+                pFits->pHDU().addKey(element.first, std::stoi(element.second), " ");
+            } else if (element.second.find_first_not_of("-0123456789.") == string::npos) //double
             {
-                pFits->pHDU().addKey(WCSdata.at(0).at(i), std::stod(WCSdata.at(1).at(i)), " ");
+                pFits->pHDU().addKey(element.first, std::stod(element.second), " ");
             } else {
-                pFits->pHDU().addKey(WCSdata.at(0).at(i), WCSdata.at(1).at(i), " ");
+                pFits->pHDU().addKey(element.first, element.second, " ");
             }
         }
         else
         {
-            pFits->pHDU().writeComment(WCSdata.at(1).at(i));
+            pFits->pHDU().writeComment(element.second);
         }
     }
 
@@ -255,25 +248,25 @@ void writeImage(const PHOTO& minkmap, string filename,
 
 template // explicit instanciation
 void writeImage(const FitsFile& minkmap, string filename,
-        const std::vector<std::vector<string>>& WCSdata, bool absolute /*= true*/,
+        const std::unordered_map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/);
 
 template // explicit instanciation
 void writeImage(const papaya2::BasicPhoto<std::complex<double> >& minkmap, string filename,
-        const std::vector<std::vector<string>>& WCSdata, bool absolute /*= true*/,
+        const std::unordered_map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/);
 
 template // explicit instanciation
 void writeImage(const papaya2::BasicPhoto<double>& minkmap, string filename,
-        const std::vector<std::vector<string>>& WCSdata, bool absolute /*= true*/,
+        const std::unordered_map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/);
 
 template<typename PHOTO> //Writes one fits file from vector of photos. Possible to write absolute value, argument, flipped image in any axis
 void write3Dimage(const std::vector<PHOTO>& minkmaps, string filename,
-        const std::vector<std::vector<string>>& WCSdata,
+        const std::unordered_map<std::string, std::string>& WCSdata,
         bool absolute /*= true*/, bool arg /*= false*/, bool flipY /*= true*/,
         bool flipX /*= false*/)
 {
@@ -323,24 +316,25 @@ void write3Dimage(const std::vector<PHOTO>& minkmaps, string filename,
         }
     long fpixel(1);
 
-    for (uint i = 0; i < WCSdata.at(0).size(); i++)
+    for (const auto& element : WCSdata)
     {
-        if (WCSdata.at(0).at(i) != "COMMENT")
+        //std::cout << i << " " << WCSdata.at(0).at(i) << " " << WCSdata.at(1).at(i) << std::endl;
+        if (element.first != "COMMENT")
         {
             //see if field is a number, and convert if it is
-            if(WCSdata.at(1).at(i).find_first_not_of("-0123456789") == string::npos) //int
+            if(element.second.find_first_not_of("-0123456789") == string::npos) //int
             {
-                pFits->pHDU().addKey(WCSdata.at(0).at(i), std::stoi(WCSdata.at(1).at(i)), " ");
-            } else if (WCSdata.at(1).at(i).find_first_not_of("-0123456789.") == string::npos) //double
+                pFits->pHDU().addKey(element.first, std::stoi(element.second), " ");
+            } else if (element.second.find_first_not_of("-0123456789.") == string::npos) //double
             {
-                pFits->pHDU().addKey(WCSdata.at(0).at(i), std::stod(WCSdata.at(1).at(i)), " ");
+                pFits->pHDU().addKey(element.first, std::stod(element.second), " ");
             } else {
-                pFits->pHDU().addKey(WCSdata.at(0).at(i), WCSdata.at(1).at(i), " ");
+                pFits->pHDU().addKey(element.first, element.second, " ");
             }
         }
         else
         {
-            pFits->pHDU().writeComment(WCSdata.at(1).at(i));
+            pFits->pHDU().writeComment(element.second);
         }
     }
 
@@ -352,7 +346,7 @@ void write3Dimage(const std::vector<PHOTO>& minkmaps, string filename,
 
 template // explicit instanciation
 void write3Dimage(const std::vector<papaya2::BasicPhoto<std::complex<double> >>& minkmaps, string filename,
-        const std::vector<std::vector<string>>& WCSdata,
+        const std::unordered_map<std::string, std::string>& WCSdata,
         bool absolute /*= true*/, bool arg /*= false*/, bool flipY /*= true*/,
         bool flipX /*= false*/);
 

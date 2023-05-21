@@ -101,7 +101,7 @@ void imageToPointPattern(FitsFile& image, int smooth, std::string name, int ENpo
 void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap, int s, bool threeD, bool average, int smooth, bool absolute_avg, double min_thresh, double max_thresh, int num_thresh, bool arg)
 { // make Minkowski map for given parameters
 //Get Coordinate (or other) info from infile
-    std::vector<std::vector<string>> minkmap_WCSdata = infile.returnWCSdata();
+    std::unordered_map<std::string, std::string> minkmap_WCSdata = infile.returnWCSdata();
 
 //Collect minkmap-results in these
     complex_image minkmap;
@@ -111,21 +111,17 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
     
     if(infile.giveKeyvalue("CRPIX1")=="error")
     {
-        minkmap_WCSdata.at(0).push_back("CRPIX1");
-        minkmap_WCSdata.at(1).push_back(std::to_string(crpix_source - 0.5*(std::max(2.,1.*smooth-smooth/6)-1)));
-        minkmap_WCSdata.at(0).push_back("CRPIX2");
-        minkmap_WCSdata.at(1).push_back(std::to_string(crpix_source2 - 0.5*(std::max(2.,1.*smooth-smooth/6)-1)));
+        minkmap_WCSdata.emplace("CRPIX1",std::to_string(crpix_source - 0.5*(std::max(2.,1.*smooth-smooth/6)-1)));
+        minkmap_WCSdata.emplace("CRPIX2",std::to_string(crpix_source2 - 0.5*(std::max(2.,1.*smooth-smooth/6)-1)));
     }
     else
     {
-        minkmap_WCSdata.at(1).at(3) = std::to_string(stod(minkmap_WCSdata.at(1).at(3)) - 0.5*(std::max(2.,1.*smooth-smooth/6)-1));
-        minkmap_WCSdata.at(1).at(4) = std::to_string(stod(minkmap_WCSdata.at(1).at(4)) + 0.5*(std::max(2.,1.*smooth-smooth/6)-1));
+        minkmap_WCSdata.at("CRPIX1") = std::to_string(stod(minkmap_WCSdata.at("CRPIX1")) - 0.5*(std::max(2.,1.*smooth-smooth/6)-1));
+        minkmap_WCSdata.at("CRPIX2") = std::to_string(stod(minkmap_WCSdata.at("CRPIX2")) - 0.5*(std::max(2.,1.*smooth-smooth/6)-1));
     }
-    minkmap_WCSdata.at(0).push_back("COMMENT");
-    minkmap_WCSdata.at(1).push_back("Original file: "+infilename);
+    minkmap_WCSdata.emplace("COMMENT","Original file: "+infilename);
     
-    minkmap_WCSdata.at(0).push_back("HISTORY");
-    minkmap_WCSdata.at(1).push_back("Edited with banana.cpp using papaya2.hpp");
+    minkmap_WCSdata.emplace("HISTORY","Edited with banana.cpp using papaya2.hpp");
 
 
     std::string sstring;
@@ -142,11 +138,10 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
 
     if (threeD && !average)
     {
-        minkmap_WCSdata.at(0).push_back("COMMENT");
-        if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
-        else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
-        else if (s==4234) minkmap_WCSdata.at(1).push_back("Minkowski map for area, smoothcount "+std::to_string(smooth));
-        else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
+        if (s==0)         minkmap_WCSdata.emplace("COMMENT","Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
+        else if (s==1)    minkmap_WCSdata.emplace("COMMENT","Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
+        else if (s==4234) minkmap_WCSdata.emplace("COMMENT","Minkowski map for area, smoothcount "+std::to_string(smooth));
+        else              minkmap_WCSdata.emplace("COMMENT","Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
         int i = 1;
         for (auto thresh : logspace (min_thresh, max_thresh, num_thresh, true))
         {
@@ -156,8 +151,7 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
             if(smooth!=0) smooth_map_plus(minkmap2,smooth);
             
             minkmaps.push_back(minkmap2);
-            minkmap_WCSdata.at(0).push_back("COMMENT");
-            minkmap_WCSdata.at(1).push_back("Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh));
+            minkmap_WCSdata.emplace("COMMENT","Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh));
             std::cout << "Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh) << std::endl;
             i++;
         }
@@ -169,11 +163,10 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
     }
     else if (threeD && average)
     {
-        minkmap_WCSdata.at(0).push_back("COMMENT");
-        if (s==0) minkmap_WCSdata.at(1).push_back("Averaged Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
-        else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
-        else if (s==4234) minkmap_WCSdata.at(1).push_back("Minkowski map for area, smoothcount "+std::to_string(smooth));
-        else minkmap_WCSdata.at(1).push_back("Averaged Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
+        if (s==0)         minkmap_WCSdata.emplace("COMMENT","Averaged Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
+        else if (s==1)    minkmap_WCSdata.emplace("COMMENT","Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
+        else if (s==4234) minkmap_WCSdata.emplace("COMMENT","Minkowski map for area, smoothcount "+std::to_string(smooth));
+        else              minkmap_WCSdata.emplace("COMMENT","Averaged Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
 
         complex_image averagemap;
         if(absolute_avg)
@@ -190,8 +183,7 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
                     smooth_map_plus(minkmap2,smooth);
                 }
                 i==1 ? averagemap=minkmap2.abs() : averagemap+=minkmap2.abs();
-                minkmap_WCSdata.at(0).push_back("COMMENT");
-                minkmap_WCSdata.at(1).push_back("Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh));
+                minkmap_WCSdata.emplace("COMMENT","Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh));
                 std::cout << "Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh) << std::endl;
                 i++;
             }
@@ -207,8 +199,7 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
                 minkowski_map_interpolated_marching_squares(&minkmap2, infile, thresh, s);
                 
                 i==1 ? averagemap=minkmap2 : averagemap+=minkmap2;
-                minkmap_WCSdata.at(0).push_back("COMMENT");
-                minkmap_WCSdata.at(1).push_back("Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh));
+                minkmap_WCSdata.emplace("COMMENT","Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh));
                 std::cout << "Threshold for layer "+std::to_string(i)+": "+std::to_string(thresh) << std::endl;
                 i++;
             }
@@ -228,13 +219,11 @@ void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap
         minkowski_map_interpolated_marching_squares(&minkmap, infile, max_thresh, s);
         if(smooth!=0) smooth_map_plus(minkmap,smooth);
         
-        minkmap_WCSdata.at(0).push_back("COMMENT");
-        if (s==0) minkmap_WCSdata.at(1).push_back("Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
-        else if (s==1) minkmap_WCSdata.at(1).push_back("Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
-        else if (s==4234) minkmap_WCSdata.at(1).push_back("Minkowski map for area, smoothcount "+std::to_string(smooth));
-        else minkmap_WCSdata.at(1).push_back("Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
-        minkmap_WCSdata.at(0).push_back("COMMENT");
-        minkmap_WCSdata.at(1).push_back("Threshold: "+std::to_string(max_thresh));
+        if (s==0)         minkmap_WCSdata.emplace("COMMENT","Minkowski map for perimeter, smoothcount "+std::to_string(smooth));
+        else if (s==1)    minkmap_WCSdata.emplace("COMMENT","Minkowski map for Euler characteristic, smoothcount "+std::to_string(smooth));
+        else if (s==4234) minkmap_WCSdata.emplace("COMMENT","Minkowski map for area, smoothcount "+std::to_string(smooth));
+        else              minkmap_WCSdata.emplace("COMMENT","Minkowski map for s = "+std::to_string(s)+", smoothcount "+std::to_string(smooth));
+        minkmap_WCSdata.emplace("COMMENT","Threshold: "+std::to_string(max_thresh));
         char buffer1 [15];
         int n = sprintf(buffer1,"%g",max_thresh);
         n++;
@@ -547,7 +536,7 @@ int main (int argc, const char **argv)
         infile.setKeyValue("CRPIX1","0.");
         infile.setKeyValue("CRPIX2","0.");
         
-        std::vector<std::vector<string>> infile_WCSdata = infile.returnWCSdata();
+        auto infile_WCSdata = infile.returnWCSdata();
         
         writeImage(infile, infilename, infile_WCSdata);
         infilename += ".fits";
@@ -641,7 +630,7 @@ int main (int argc, const char **argv)
             
             //smooth and get shift in coordinates right
             smooth_map_plus(image,smooth);
-            std::vector<std::vector<string>> minkmap_WCSdata = infile.returnWCSdata();
+           // auto minkmap_WCSdata = infile.returnWCSdata();
             image.setKeyValue("CRPIX1",std::to_string(stod(image.giveKeyvalue("CRPIX1")) - 0.5*(std::max(2.,1.*smooth-smooth/6)-1)));
             image.setKeyValue("CRPIX2",std::to_string(stod(image.giveKeyvalue("CRPIX2")) + 0.5*(std::max(2.,1.*smooth-smooth/6)-1)));
             
@@ -840,7 +829,7 @@ int main (int argc, const char **argv)
     {
         std::ifstream histfiles (histfile);
         std::string objectlist;
-        std::vector<std::vector<string>> minkmap_WCSdata = infile.returnWCSdata();
+        auto minkmap_WCSdata = infile.returnWCSdata();
         
         // Every line in histfile should contain one objectlist. Region files should be saved in settings.objectDIR
         while (std::getline(histfiles, objectlist)) 

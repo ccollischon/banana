@@ -2,6 +2,7 @@
 #define _banana_fitsfile_hpp_
 
 #include <algorithm>
+#include <unordered_map>
 
 #include "../papaya2.hpp"
 
@@ -9,32 +10,26 @@ extern double crpix_source;
 
 struct FitsFile : papaya2::Photo
 {
-    std::vector<std::string> WCSkeynames_here;
-    std::vector<std::string> WCSvalues;
+    std::unordered_map<std::string, std::string> WCSdata_;
 
     FitsFile (const std::string &infilename, int layer = 0, unsigned hdu = 0);
 
-    FitsFile (const std::string &infilename, std::vector<std::string>& WCSkeynames, int layer = 0, unsigned hdu = 0);
+    FitsFile (const std::string &infilename, const std::vector<std::string>& WCSkeynames, int layer = 0, unsigned hdu = 0);
 
-    FitsFile (const std::vector<std::vector<double>> &map, const std::vector<std::vector<std::string>> &WCSdata); //Create a FitsFile from 2D-vector containing image
+    FitsFile (const std::vector<std::vector<double>> &map, const std::unordered_map<std::string, std::string> &WCSdata); //Create a FitsFile from 2D-vector containing image
 
     // allow overwriting pixels by the user
     inline double &at (int i, int j) { return papaya2::Photo::at (i, j); }
 
     // return WCS data in given order
-    inline std::vector<std::vector<std::string>> returnWCSdata()
+    inline std::unordered_map<std::string, std::string> returnWCSdata() const
     {
-        std::vector<std::vector<std::string>> ret;
-        ret.push_back(WCSkeynames_here);
-        ret.push_back(WCSvalues);
-        return ret;
+        return WCSdata_;
     }
 
-    inline void addnoise () { at (2,2) = 1; }
-
-    std::string giveKeyvalue(std::string name);
+    std::string giveKeyvalue(const std::string& name) const;
     
-    void setKeyValue(std::string name, std::string newValue);
+    void setKeyValue(const std::string& name, const std::string& newValue);
     
 
     FitsFile &operator-=(FitsFile& b); //subtract two files with equal CDELT at correct sky positions
@@ -106,13 +101,13 @@ struct FitsFile : papaya2::Photo
 
 template<typename PHOTO> //Writes one fits file from photo. Possible to write absolute value, argument, flipped image in any axis
 void writeImage(const PHOTO& minkmap, std::string filename,
-		const std::vector<std::vector<std::string>>& WCSdata,
+		const std::unordered_map<std::string, std::string>& WCSdata,
 		bool absolute = true, bool arg = false, bool flipY = true,
 		bool flipX = false, bool highPrec = false);
 
 template<typename PHOTO> //Writes one fits file from vector of photos. Possible to write absolute value, argument, flipped image in any axis
 void write3Dimage(const std::vector<PHOTO>& minkmaps, std::string filename,
-		const std::vector<std::vector<std::string>>& WCSdata, bool absolute =
+		const std::unordered_map<std::string, std::string>& WCSdata, bool absolute =
 		 true, bool arg = false, bool flipY = true,
 		bool flipX = false);
 

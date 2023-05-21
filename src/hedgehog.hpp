@@ -114,14 +114,12 @@ void makeLinedensity(const std::vector<std::vector<double>>& lines, int smooth, 
     char buffer1 [15];
     int n = sprintf(buffer1,"_%g",thresh);
     n++;
-    std::vector<std::vector<string>> minkmap_WCSdata = lineImage.returnWCSdata();
+    std::unordered_map<std::string,std::string> minkmap_WCSdata = lineImage.returnWCSdata();
     char buffer2a [51];
     n = sprintf(buffer2a,"%d thresholds %g-%g",numt,mint,maxt);
     n++;
-    minkmap_WCSdata.at(0).push_back("Comment");
-    minkmap_WCSdata.at(1).push_back("Source image: "+wavelength+" smooth "+std::to_string(smooth) +" s 2 minkmap with "+buffer2a);
-    minkmap_WCSdata.at(0).push_back("HISTORY");
-    minkmap_WCSdata.at(1).push_back("Line densities for above image created with Minkowski absolute value threshold lineScale="+std::to_string(thresh));
+    minkmap_WCSdata.emplace("COMMENT","Source image: "+wavelength+" smooth "+std::to_string(smooth) +" s 2 minkmap with "+buffer2a);
+    minkmap_WCSdata.emplace("HISTORY","Line densities for above image created with Minkowski absolute value threshold lineScale="+std::to_string(thresh));
     string outname = settings.linedensDIR+wavelength+"_lines_smooth="+std::to_string(smooth)+"_thresh"+buffer1+"_scalelength";
     writeImage(lineImage, outname,minkmap_WCSdata);
     
