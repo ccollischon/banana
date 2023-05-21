@@ -46,16 +46,6 @@ void smooth_map_plus (PHOTO& infile, int squaresize)
     }
 }
 
-template<typename PHOTO>
-void smooth_map (PHOTO& infile)
-{
-    for (int j = 1; j < infile.height()-1; ++j)
-    for (int i = 1; i < infile.width()-1; ++i)
-    {
-        infile(i,j) = (infile(i,j) + infile(i+1,j)/2. + infile(i-1,j)/2. + infile(i,j+1)/2. + infile(i,j-1)/2. + infile(i+1,j+1)/4.+ infile(i+1,j-1)/4. + infile(i-1,j+1)/4. + infile(i-1,j-1)/4. )/4.;
-    }
-}
-
 
 template <typename PHOTO>
 PHOTO averagemaps(const std::vector<PHOTO>& datamaps)
@@ -125,7 +115,7 @@ void maskBoxes(PHOTO& infile, const std::vector<std::vector<double>>& boxes)
 }
 
 template<typename PHOTO>
-BasicPhoto<double> getMask(PHOTO& infile, const std::vector<std::vector<double>>& boxes)
+BasicPhoto<double> getMask(const PHOTO& infile, const std::vector<std::vector<double>>& boxes)
 {
     BasicPhoto<double> mask;
     mask.set_coordinates (0, 0, 1, 1, infile.width(), infile.height());
@@ -157,7 +147,7 @@ void includeBoxes(PHOTO& infile, const std::vector<std::vector<double>>& boxes)
 }
 
 template<typename PHOTO>
-double averageBoxes(PHOTO& infile, const std::vector<std::vector<double>>& boxes)
+double averageBoxes(const PHOTO& infile, const std::vector<std::vector<double>>& boxes)
 {
     //std::cout << "Getting mask...\n";
     BasicPhoto<double> mask = getMask(infile, boxes);
@@ -176,7 +166,7 @@ double averageBoxes(PHOTO& infile, const std::vector<std::vector<double>>& boxes
 }
 
 template<typename PHOTO>
-PHOTO cutout(PHOTO& infile, const std::vector<std::vector<double>>& boxes)
+PHOTO cutout(const PHOTO& infile, const std::vector<std::vector<double>>& boxes)
 {
     BasicPhoto<double> mask = getMask(infile, boxes);
     
