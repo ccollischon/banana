@@ -101,7 +101,7 @@ void imageToPointPattern(FitsFile& image, int smooth, std::string name, int ENpo
 void makeMinkmap(std::string infilename, FitsFile& infile, std::string outminmap, int s, bool threeD, bool average, int smooth, bool absolute_avg, double min_thresh, double max_thresh, int num_thresh, bool arg)
 { // make Minkowski map for given parameters
 //Get Coordinate (or other) info from infile
-    std::unordered_map<std::string, std::string> minkmap_WCSdata = infile.returnWCSdata();
+    auto minkmap_WCSdata = infile.returnWCSdata();
 
 //Collect minkmap-results in these
     complex_image minkmap;

@@ -114,7 +114,7 @@ void makeLinedensity(const std::vector<std::vector<double>>& lines, int smooth, 
     char buffer1 [15];
     int n = sprintf(buffer1,"_%g",thresh);
     n++;
-    std::unordered_map<std::string,std::string> minkmap_WCSdata = lineImage.returnWCSdata();
+    auto minkmap_WCSdata = lineImage.returnWCSdata();
     char buffer2a [51];
     n = sprintf(buffer2a,"%d thresholds %g-%g",numt,mint,maxt);
     n++;

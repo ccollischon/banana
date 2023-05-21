@@ -2,7 +2,7 @@
 #define _banana_fitsfile_hpp_
 
 #include <algorithm>
-#include <unordered_map>
+#include <map>
 
 #include "../papaya2.hpp"
 
@@ -10,19 +10,19 @@ extern double crpix_source;
 
 struct FitsFile : papaya2::Photo
 {
-    std::unordered_map<std::string, std::string> WCSdata_;
+    std::map<std::string, std::string> WCSdata_;
 
     FitsFile (const std::string &infilename, int layer = 0, unsigned hdu = 0);
 
     FitsFile (const std::string &infilename, const std::vector<std::string>& WCSkeynames, int layer = 0, unsigned hdu = 0);
 
-    FitsFile (const std::vector<std::vector<double>> &map, std::unordered_map<std::string, std::string> WCSdata); //Create a FitsFile from 2D-vector containing image
+    FitsFile (const std::vector<std::vector<double>> &map, std::map<std::string, std::string> WCSdata); //Create a FitsFile from 2D-vector containing image
 
     // allow overwriting pixels by the user
     inline double &at (int i, int j) { return papaya2::Photo::at (i, j); }
 
     // return WCS data in given order
-    inline std::unordered_map<std::string, std::string> returnWCSdata() const
+    inline std::map<std::string, std::string> returnWCSdata() const
     {
         return WCSdata_;
     }
@@ -98,13 +98,13 @@ struct FitsFile : papaya2::Photo
 
 template<typename PHOTO> //Writes one fits file from photo. Possible to write absolute value, argument, flipped image in any axis
 void writeImage(const PHOTO& minkmap, std::string filename,
-		const std::unordered_map<std::string, std::string>& WCSdata,
+		const std::map<std::string, std::string>& WCSdata,
 		bool absolute = true, bool arg = false, bool flipY = true,
 		bool flipX = false, bool highPrec = false);
 
 template<typename PHOTO> //Writes one fits file from vector of photos. Possible to write absolute value, argument, flipped image in any axis
 void write3Dimage(const std::vector<PHOTO>& minkmaps, std::string filename,
-		const std::unordered_map<std::string, std::string>& WCSdata, bool absolute =
+		const std::map<std::string, std::string>& WCSdata, bool absolute =
 		 true, bool arg = false, bool flipY = true,
 		bool flipX = false);
 

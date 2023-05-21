@@ -95,7 +95,7 @@ FitsFile::FitsFile(const string &infilename, const std::vector<string>& WCSkeyna
 }
 
 FitsFile::FitsFile(const std::vector<std::vector<double>> &map,
-        std::unordered_map<std::string,std::string> WCSdata) : WCSdata_{std::move(WCSdata)} //Create a FitsFile from 2D-vector containing image
+        std::map<std::string,std::string> WCSdata) : WCSdata_{std::move(WCSdata)} //Create a FitsFile from 2D-vector containing image
 {
     std::cout << "Converting map to FitsFile...\n";
     set_coordinates(0, 0, map.size(), map.at(0).size(), map.size(),
@@ -149,7 +149,7 @@ FitsFile &FitsFile::operator-=(const FitsFile& b) //subtract two files with equa
 
 template<typename PHOTO> //Writes one fits file from photo. Possible to write absolute value, argument, flipped image in any axis
 void writeImage(const PHOTO& minkmap, string filename,
-        const std::unordered_map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
+        const std::map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/)
 {
@@ -226,25 +226,25 @@ void writeImage(const PHOTO& minkmap, string filename,
 
 template // explicit instanciation
 void writeImage(const FitsFile& minkmap, string filename,
-        const std::unordered_map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
+        const std::map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/);
 
 template // explicit instanciation
 void writeImage(const papaya2::BasicPhoto<std::complex<double> >& minkmap, string filename,
-        const std::unordered_map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
+        const std::map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/);
 
 template // explicit instanciation
 void writeImage(const papaya2::BasicPhoto<double>& minkmap, string filename,
-        const std::unordered_map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
+        const std::map<std::string, std::string>& WCSdata, bool absolute /*= true*/,
         bool arg /*= false*/, bool flipY /*= true*/, bool flipX /*= false*/,
         bool highPrec /*= false*/);
 
 template<typename PHOTO> //Writes one fits file from vector of photos. Possible to write absolute value, argument, flipped image in any axis
 void write3Dimage(const std::vector<PHOTO>& minkmaps, string filename,
-        const std::unordered_map<std::string, std::string>& WCSdata,
+        const std::map<std::string, std::string>& WCSdata,
         bool absolute /*= true*/, bool arg /*= false*/, bool flipY /*= true*/,
         bool flipX /*= false*/)
 {
@@ -324,7 +324,7 @@ void write3Dimage(const std::vector<PHOTO>& minkmaps, string filename,
 
 template // explicit instanciation
 void write3Dimage(const std::vector<papaya2::BasicPhoto<std::complex<double> >>& minkmaps, string filename,
-        const std::unordered_map<std::string, std::string>& WCSdata,
+        const std::map<std::string, std::string>& WCSdata,
         bool absolute /*= true*/, bool arg /*= false*/, bool flipY /*= true*/,
         bool flipX /*= false*/);
 
