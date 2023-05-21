@@ -32,7 +32,7 @@ struct FitsFile : papaya2::Photo
     void setKeyValue(const std::string& name, const std::string& newValue);
     
 
-    FitsFile &operator-=(FitsFile& b); //subtract two files with equal CDELT at correct sky positions
+    FitsFile &operator-=(const FitsFile& b); //subtract two files with equal CDELT at correct sky positions
 
     FitsFile &operator-=(double b)
     {

@@ -125,36 +125,23 @@ void FitsFile::setKeyValue(const std::string& name, const std::string& newValue)
 	WCSdata_.insert_or_assign(name,newValue);
 }
 
-FitsFile &FitsFile::operator-=(FitsFile& b) //subtract two files with equal CDELT at correct sky positions
+FitsFile &FitsFile::operator-=(const FitsFile& b) //subtract two files with equal CDELT at correct sky positions
 {
 	std::cout << "Subtracting FITS files..." << std::endl;
 	int w = std::min(numx, b.width());
 	int h = std::min(numy, b.height());
-	int CRPIX1_here = 0, CRPIX1_there = 0;
-	std::unordered_map<std::string, std::string> WCSdata_there = b.returnWCSdata();
 
 	//Find positions of CRPIX1 in both images. Only works for equal CDELT1/2
-	auto it = WCSdata_.find("CRPIX1");
-	if (it != WCSdata_.end())
-	{
-		CRPIX1_here = std::stoi(it->second);
-		std::cout << it->first << " " << CRPIX1_here << std::endl;
-
-	}
-	it = WCSdata_there.find("CRPIX1");
-	if (it != WCSdata_there.end())
-	{
-		CRPIX1_there = std::stoi(it->second);
-		std::cout << it->first << " " << CRPIX1_there << std::endl;
-	}
-
+    int CRPIX1_here =    giveKeyvalue("CRPIX1")=="error" ? 0 : std::stoi(  giveKeyvalue("CRPIX1"));
+    int CRPIX1_there = b.giveKeyvalue("CRPIX1")=="error" ? 0 : std::stoi(b.giveKeyvalue("CRPIX1"));
+    
 	//Calculate shift between images. Only works for equal CDELT1/2
 	int shift = CRPIX1_here-CRPIX1_there;
 	//Subtract
 	for(int i=std::max(shift,0); i<w-std::max(-1*shift,0); i++)
 	for(int j=std::max(shift,0); j<h-std::max(-1*shift,0); j++)
 	{
-		at(i,j) = at(i,j)-b.at((i-shift),(j-shift));
+		at(i,j) = at(i,j)-b((i-shift),(j-shift));
 	}
 	return *this;
 }
