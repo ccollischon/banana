@@ -146,6 +146,32 @@ FitsFile &FitsFile::operator-=(const FitsFile& b) //subtract two files with equa
 	return *this;
 }
 
+void WCSdataToHeader(CCfits::FITS& fits , const std::map<std::string, std::string>& WCSdata)
+{
+	for (const auto& element : WCSdata)
+    {
+        //std::cout << i << " " << WCSdata.at(0).at(i) << " " << WCSdata.at(1).at(i) << std::endl;
+        if (element.first != "COMMENT")
+        {
+            //see if field is a number, and convert if it is
+            if(element.second.find_first_not_of("-0123456789") == string::npos) //int
+            {
+                fits.pHDU().addKey(element.first, std::stoi(element.second), " ");
+            } else if (element.second.find_first_not_of("-0123456789.") == string::npos) //double
+            {
+                fits.pHDU().addKey(element.first, std::stod(element.second), " ");
+            } else {
+                fits.pHDU().addKey(element.first, element.second, " ");
+            }
+        }
+        else
+        {
+            fits.pHDU().writeComment(element.second);
+        }
+    }
+	
+}
+
 
 template<typename PHOTO> //Writes one fits file from photo. Possible to write absolute value, argument, flipped image in any axis
 void writeImage(const PHOTO& minkmap, string filename,
@@ -155,8 +181,7 @@ void writeImage(const PHOTO& minkmap, string filename,
 {
     std::cout << "Writing FITS file " + filename + " ..." << std::endl;
     long naxis = 2;
-    long naxes[2] =
-    { minkmap.width(), minkmap.height() };
+    long naxes[2] = { minkmap.width(), minkmap.height() };
     std::unique_ptr<CCfits::FITS> pFits;
     if (!highPrec)
         pFits.reset(
@@ -168,8 +193,7 @@ void writeImage(const PHOTO& minkmap, string filename,
                         naxes));
 
     // NOTE: At this point we assume that there is only 1 layer.
-    long nelements = std::accumulate(&naxes[0], &naxes[naxis], 1,
-            std::multiplies<long>());
+    long nelements = minkmap.width()* minkmap.height();
     std::valarray<double> array(nelements);
 
     for (long i = 0; i < nelements; i++)
@@ -194,32 +218,11 @@ void writeImage(const PHOTO& minkmap, string filename,
         else
             array[i] = (1. * std::arg(val) + 3.14159) * (std::abs(val) > 0.01);
     }
-    long fpixel(1);
 
     //Header information
-    for (const auto& element : WCSdata)
-    {
-        //std::cout << i << " " << WCSdata.at(0).at(i) << " " << WCSdata.at(1).at(i) << std::endl;
-        if (element.first != "COMMENT")
-        {
-            //see if field is a number, and convert if it is
-            if(element.second.find_first_not_of("-0123456789") == string::npos) //int
-            {
-                pFits->pHDU().addKey(element.first, std::stoi(element.second), " ");
-            } else if (element.second.find_first_not_of("-0123456789.") == string::npos) //double
-            {
-                pFits->pHDU().addKey(element.first, std::stod(element.second), " ");
-            } else {
-                pFits->pHDU().addKey(element.first, element.second, " ");
-            }
-        }
-        else
-        {
-            pFits->pHDU().writeComment(element.second);
-        }
-    }
+    WCSdataToHeader(*pFits,WCSdata);
 
-    pFits->pHDU().write(fpixel, nelements, array);
+    pFits->pHDU().write(1, nelements, array);
 
     std::cout << "Done! \n";
 }
@@ -250,21 +253,16 @@ void write3Dimage(const std::vector<PHOTO>& minkmaps, string filename,
 {
     std::cout << "Writing 3D FITS file " + filename + " ..." << std::endl;
 
-    int N = minkmaps.size();
-
     int w = minkmaps.at(0).width();
     int h = minkmaps.at(0).height();
+    int N = minkmaps.size();
 
     long naxis = 3;
-    long naxes[3] =
-    { w, h, N };
+    long naxes[3] = { w, h, N };
     std::unique_ptr<CCfits::FITS> pFits;
-    pFits.reset(
-            new CCfits::FITS("!" + filename + ".fits", FLOAT_IMG, naxis,
-                    naxes));
+    pFits.reset( new CCfits::FITS("!" + filename + ".fits", FLOAT_IMG, naxis, naxes) );
 
-    long nelements = std::accumulate(&naxes[0], &naxes[naxis], 1,
-            std::multiplies<long>());
+    long nelements = w*h*N;
     std::valarray<double> array(nelements);
 
     for (long i = 0; i < nelements / N; i++)
@@ -292,31 +290,10 @@ void write3Dimage(const std::vector<PHOTO>& minkmaps, string filename,
                 array[i + j * nelements / N] = 1.
                         * std::arg(minkmaps.at(j)(i % w, h - i / w));
         }
-    long fpixel(1);
 
-    for (const auto& element : WCSdata)
-    {
-        //std::cout << i << " " << WCSdata.at(0).at(i) << " " << WCSdata.at(1).at(i) << std::endl;
-        if (element.first != "COMMENT")
-        {
-            //see if field is a number, and convert if it is
-            if(element.second.find_first_not_of("-0123456789") == string::npos) //int
-            {
-                pFits->pHDU().addKey(element.first, std::stoi(element.second), " ");
-            } else if (element.second.find_first_not_of("-0123456789.") == string::npos) //double
-            {
-                pFits->pHDU().addKey(element.first, std::stod(element.second), " ");
-            } else {
-                pFits->pHDU().addKey(element.first, element.second, " ");
-            }
-        }
-        else
-        {
-            pFits->pHDU().writeComment(element.second);
-        }
-    }
+    WCSdataToHeader(*pFits,WCSdata);
 
-    pFits->pHDU().write(fpixel, nelements, array);
+    pFits->pHDU().write(1, nelements, array);
 
     std::cout << "Done! \n";
 }
