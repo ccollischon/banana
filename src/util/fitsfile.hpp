@@ -48,7 +48,7 @@ struct FitsFile : papaya2::Photo
     }
 
 
-    inline double atds9pix(double pix1, double pix2) //returns value at given pixel (ds9), accounts for shift
+    inline double atds9pix(double pix1, double pix2) const //returns value at given pixel (ds9), accounts for shift
     {
         double value = 0;
         //Calculate shift between images. Only works for equal CDELT1/2
@@ -57,12 +57,12 @@ struct FitsFile : papaya2::Photo
         //std::cout << pix1+shift << " " << pix2-shift << std::endl;
 
         if( (pix1+shift-1)<width() && (pix1+shift-1)>0 && (height()-pix2+shift)<height() && (height()-pix2+shift)>0 )
-            value = at((int)(pix1+shift-1),(int)(height()-pix2+shift));
+            value = operator ()((int)(pix1+shift-1),(int)(height()-pix2+shift));
 
         return value;
     }
 
-    inline std::vector<int> giveUnshiftedds9Coord(double pix1, double pix2) //Takes FitsFile coordinates of some shifted minkmap, returns unshifted pixel coordinate in ds9 (to be used for ds9 region files)
+    inline std::vector<int> giveUnshiftedds9Coord(double pix1, double pix2) const //Takes FitsFile coordinates of some shifted minkmap, returns unshifted pixel coordinate in ds9 (to be used for ds9 region files)
     {
         double shift = giveShift();
         std::vector<int> output;
@@ -71,7 +71,7 @@ struct FitsFile : papaya2::Photo
         return output;
     }
 
-    inline std::vector<int> giveShiftedCoord(double pix1, double pix2) // Takes ds9 coordinates of unshifted image and returns pixel coordinates of shifted FitsFile
+    inline std::vector<int> giveShiftedCoord(double pix1, double pix2) const // Takes ds9 coordinates of unshifted image and returns pixel coordinates of shifted FitsFile
     {
         double shift = -giveShift();
         std::vector<int> output;
@@ -80,7 +80,7 @@ struct FitsFile : papaya2::Photo
         return output;
     }
 
-    inline double giveShift() //Subtract from x and add to y for going from original to shifted
+    inline double giveShift() const //Subtract from x and add to y for going from original to shifted
     {
         double CRPIX1_here = std::stod(giveKeyvalue("CRPIX1"));
         double shift = crpix_source-CRPIX1_here;
@@ -110,7 +110,7 @@ void write3Dimage(const std::vector<PHOTO>& minkmaps, std::string filename,
 
 void erosionDilation(FitsFile& infile, int diameter);
 
-double sumOverSquares(FitsFile& image, int smooth);
+double sumOverSquares(const FitsFile& image, int smooth);
 
 void takeLogPositive(FitsFile& image);
 

@@ -10,7 +10,7 @@
 
 #include <iomanip>
 
-std::vector<std::vector<double>> makeHedgehog(FitsFile& infileAbs, FitsFile& infileArg, int smooth, double thresh, string wavelength)
+std::vector<std::vector<double>> makeHedgehog(const FitsFile& infileAbs, const FitsFile& infileArg, int smooth, double thresh, std::string wavelength)
 {
     double length = smooth/2;
     double pi = 3.14159265358979;
@@ -25,7 +25,7 @@ std::vector<std::vector<double>> makeHedgehog(FitsFile& infileAbs, FitsFile& inf
     std::ofstream ofs (settings.resultDIR+"angles_"+wavelength+"_smooth="+std::to_string(smooth)+"_thresh"+buffer1+"_scalelength.reg");
     ofs << "# Region file format: DS9 version 4.1 \n global color=green dashlist=8 3 width=1 font=\"helvetica 10 normal roman\" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1 \n image \n";
     
-    int lineodd = 0; //helper to write only every 2nd line into region file
+    bool lineodd = false; //helper to write only every 2nd line into region file
     int stepsize = std::max(smooth/6,1);
     //if(smooth<100) stepsize *= 2;
     for (int j = stepsize/2; j < end1; j+=stepsize)
@@ -37,16 +37,17 @@ std::vector<std::vector<double>> makeHedgehog(FitsFile& infileAbs, FitsFile& inf
             double angle = std::fmod(0.5*(pi-infileArg(i,j)), pi);
             std::vector<int> coord = infileAbs.giveUnshiftedds9Coord(i,j);
             length = smooth/2*(infileAbs(i,j)/thresh);
-            line.push_back(1.*coord.at(0)-length*cos(angle));
-            line.push_back(1.*coord.at(1)-length*sin(angle));
-            line.push_back(1.*coord.at(0)+length*cos(angle));
-            line.push_back(1.*coord.at(1)+length*sin(angle));
-            lines.push_back(line);
+            line.emplace_back(1.*coord.at(0)-length*cos(angle));
+            line.emplace_back(1.*coord.at(1)-length*sin(angle));
+            line.emplace_back(1.*coord.at(0)+length*cos(angle));
+            line.emplace_back(1.*coord.at(1)+length*sin(angle));
             
             int color = std::min((int)(200*infileAbs(i,j)/thresh),255);
-            if(smooth>=100)  ofs << "line(" << line.at(0) << "," << line.at(1) << "," << line.at(2) << "," << line.at(3) << ") # line=0 0 color=#"<< std::hex<<std::setw(2)<<std::setfill('0') << color << "0000" << std::endl;
-            else if(lineodd%2)   ofs << "line(" << line.at(0) << "," << line.at(1) << "," << line.at(2) << "," << line.at(3) << ") # line=0 0 color=#00"<< std::hex<<std::setw(2)<<std::setfill('0') << color << "00" << std::endl;
-            lineodd++;
+            if(smooth>=100)  ofs << "line(" << line.at(0) << "," << line.at(1) << "," << line.at(2) << "," << line.at(3) << ") # line=0 0 color=#"<< std::hex<<std::setw(2)<<std::setfill('0') << color << "0000\n";
+            else if(lineodd)   ofs << "line(" << line.at(0) << "," << line.at(1) << "," << line.at(2) << "," << line.at(3) << ") # line=0 0 color=#00"<< std::hex<<std::setw(2)<<std::setfill('0') << color << "00\n";
+            
+            lines.emplace_back(std::move(line)); //move since line has reached its lifetime
+            lineodd = !lineodd;
         }
     }
     
@@ -55,7 +56,7 @@ std::vector<std::vector<double>> makeHedgehog(FitsFile& infileAbs, FitsFile& inf
     return lines;
 }
 
-void makeLinedensity(const std::vector<std::vector<double>>& lines, int smooth, double thresh, string wavelength, FitsFile& base, double mint, double maxt, int numt)
+void makeLinedensity(const std::vector<std::vector<double>>& lines, int smooth, double thresh, std::string wavelength, const FitsFile& base, double mint, double maxt, int numt)
 {
     std::cout<< "Starting line density... \n";
     FitsFile lineImage = base;
@@ -126,7 +127,7 @@ void makeLinedensity(const std::vector<std::vector<double>>& lines, int smooth, 
     //return lineImage;
 }
 
-void bubbles(FitsFile& infile, int smooth, int thresh, string wavelength, double line_thresh, FitsFile& smoothA, FitsFile& smoothB)
+void bubbles(const FitsFile& infile, int smooth, int thresh, std::string wavelength, double line_thresh, const FitsFile& smoothA, const FitsFile& smoothB)
 {
     int width = infile.width();
     int height = infile.height();
@@ -185,9 +186,9 @@ void bubbles(FitsFile& infile, int smooth, int thresh, string wavelength, double
                 std::cout << "F";
                     std::ofstream ofs_object(settings.objectDIR+"bubble_sorted_"+wavelength+"_smooth="+std::to_string(smooth)+"_thresh"+buffer1+"_nr_"+std::to_string(objectnumber));
                     
-                    ofs << "box(" << std::to_string(ds9coord.at(0)) <<","<< std::to_string(ds9coord.at(1)) <<","<< std::to_string(length) <<","<< std::to_string(length) <<",0)"<< std::endl;
-                    ofs_object << std::to_string(ds9coord.at(0)) <<" "<< std::to_string(ds9coord.at(1)) <<" "<< std::to_string(length) << " " << std::to_string(length) << std::endl;
-                    ofs_objectnames << "bubble_sorted_"<<wavelength<<"_smooth="<<std::to_string(smooth)<<"_thresh"<<buffer1<<"_nr_"<<std::to_string(objectnumber) << std::endl;
+                    ofs << "box(" << std::to_string(ds9coord.at(0)) <<","<< std::to_string(ds9coord.at(1)) <<","<< std::to_string(length) <<","<< std::to_string(length) <<",0)"<< '\n';
+                    ofs_object << std::to_string(ds9coord.at(0)) <<" "<< std::to_string(ds9coord.at(1)) <<" "<< std::to_string(length) << " " << std::to_string(length) << '\n';
+                    ofs_objectnames << "bubble_sorted_"<<wavelength<<"_smooth="<<std::to_string(smooth)<<"_thresh"<<buffer1<<"_nr_"<<std::to_string(objectnumber) << '\n';
                     objectnumber++;
                 std::cout << "G\n";
                 }
@@ -207,7 +208,7 @@ void bubbles(FitsFile& infile, int smooth, int thresh, string wavelength, double
 
 
 
-std::vector<std::vector<std::vector<double>>> combineRegions(string bubbletypes) //Combine all regions from objectlists listed in bubbletypes-named file into actual bubbles
+std::vector<std::vector<std::vector<double>>> combineRegions(std::string bubbletypes) //Combine all regions from objectlists listed in bubbletypes-named file into actual bubbles
 {
     std::ifstream bubblefile (bubbletypes);
     std::string listname;
@@ -302,7 +303,7 @@ std::vector<std::vector<std::vector<double>>> combineRegions(string bubbletypes)
     return combinedBubbles;
 }
 
-void writeRegion(string filename, std::vector<std::vector<std::vector<double>>> bubbles)
+void writeRegion(std::string filename, std::vector<std::vector<std::vector<double>>> bubbles)
 { //Write both ds9 region file and objectfile for each bubble and maskfile listing all objectfiles
     std::ofstream maskfile(filename);
     for(uint i=0; i<bubbles.size(); i++)

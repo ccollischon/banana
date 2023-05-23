@@ -42,7 +42,7 @@ double constant(double x, double s)
     return 1;
 }
 
-void makepointHist(FitsFile& infile, string listname, string outname, double min_thresh, double max_thresh, double num_thresh)
+void makepointHist(const FitsFile& infile, std::string listname, std::string outname, double min_thresh, double max_thresh, double num_thresh)
 { // Make histogram of brighntess of image at points
     std::vector<std::vector<double>> hist;
     std::vector<double> increments = linspace (min_thresh, max_thresh, num_thresh, true);
@@ -70,7 +70,7 @@ void makepointHist(FitsFile& infile, string listname, string outname, double min
     }
 }
 
-void makeimageHist(FitsFile& infile, string outname, double min_thresh, double max_thresh, double num_thresh)
+void makeimageHist(const FitsFile& infile, std::string outname, double min_thresh, double max_thresh, double num_thresh)
 { // make histogram of whole image
     std::vector<std::vector<double>> hist;
     std::vector<double> increments = linspace (min_thresh, max_thresh, num_thresh, true);
@@ -81,7 +81,7 @@ void makeimageHist(FitsFile& infile, string outname, double min_thresh, double m
     for(int i=0; i<infile.width(); i++)
     for(int j=0; j<infile.height(); j++)
     {
-        double val = infile.at(i, j);
+        double val = infile(i, j);
         if(val>=min_thresh && val <= max_thresh)
             values.at((val-min_thresh)/inc)++;
     }
@@ -97,7 +97,7 @@ void makeimageHist(FitsFile& infile, string outname, double min_thresh, double m
 }
 
 template<typename PHOTO>
-BasicPhoto<double> makePointspread(PHOTO& infile, std::string listname, double radius, double width, double (*f)(double,double))
+BasicPhoto<double> makePointspread(const PHOTO& infile, std::string listname, double radius, double width, double (*f)(double,double))
 {// Spreads points in image to larger blobs with specified radius and function
     BasicPhoto<double> mask;
     mask.set_coordinates (0, 0, infile.width(), infile.height(), infile.width(), infile.height());
@@ -127,7 +127,7 @@ BasicPhoto<double> makePointspread(PHOTO& infile, std::string listname, double r
     return mask;
 }
 
-double getMeanColumn(std::vector<std::vector<double>> bubbleboxes, uint column)
+double getMeanColumn(const std::vector<std::vector<double>>& bubbleboxes, uint column)
 { //Takes table with one vector for each line and calculates the mean value of columns
     double result = 0.;
     for(auto line:bubbleboxes)
@@ -138,7 +138,7 @@ double getMeanColumn(std::vector<std::vector<double>> bubbleboxes, uint column)
     return result;
 }
 
-void writeBubblelist(std::vector<std::vector<std::vector<double>>> allBubbles, std::string filename)
+void writeBubblelist(const std::vector<std::vector<std::vector<double>>>& allBubbles, std::string filename)
 { //Takes complete list of bubbles, combines all info for each bubble, writes table containing only centers (R readable) and ds9-readable file containing centers and average size
     std::ofstream ofs(settings.resultDIR+"R_readable_"+filename);
     std::ofstream ds9file(settings.resultDIR+filename+"_all.reg");

@@ -678,22 +678,22 @@ int main (int argc, const char **argv)
         
         //Read minkmaps
         std::string filename = path + filenameAabs + std::to_string(smooth) + filenameB + ".fits";
-        FitsFile* absImage;
-        FitsFile* argImage;
+        std::unique_ptr<FitsFile> absImage;
+        std::unique_ptr<FitsFile> argImage;
         try{
-            absImage = new FitsFile(filename, WCSkeynames);
+            absImage = std::make_unique<FitsFile>(filename, WCSkeynames);
         } catch(const CCfits::FITS::CantOpen&) {
             std::cout << "Minkmap doesn't exist. Make new one...\n";
             makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, average, smooth, absolute_avg, min_thresh, max_thresh, num_thresh, false);
-            absImage = new FitsFile(filename, WCSkeynames);
+            absImage = std::make_unique<FitsFile>(filename, WCSkeynames);
         }
         filename = path + filenameAarg + std::to_string(smooth) + filenameB + ".fits";
         try{
-            argImage = new FitsFile(filename, WCSkeynames);
+            argImage = std::make_unique<FitsFile>(filename, WCSkeynames);
         } catch(const CCfits::FITS::CantOpen&) {
             std::cout << "Minkmap doesn't exist. Make new one...\n";
             makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, average, smooth, absolute_avg, min_thresh, max_thresh, num_thresh, true);
-            argImage = new FitsFile(filename, WCSkeynames);
+            argImage = std::make_unique<FitsFile>(filename, WCSkeynames);
         }
         
         std::vector<std::vector<double>> lines = makeHedgehog(*absImage,*argImage,smooth,line_scale,wavelength);
@@ -773,14 +773,14 @@ int main (int argc, const char **argv)
         }
         //Read minkmap B
         filenameS = path + filenameAabs + std::to_string(othersmooth) + filenameB + ".fits";
-        FitsFile* smoothB;
+        std::unique_ptr<FitsFile> smoothB;
         try{
-            smoothB = new FitsFile(filenameS, WCSkeynames);
+            smoothB = std::make_unique<FitsFile>(filenameS, WCSkeynames);
         } catch(const CCfits::FITS::CantOpen&) {
             std::cout << "Minkmap doesn't exist. Make new one...\n";
             makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, average, othersmooth, absolute_avg, min_thresh, max_thresh, num_thresh, false);
             //makeMinkmap(infilename, infile, outminmap+wavelength, s, threeD, average,      smooth, absolute_avg, min_thresh, max_thresh, num_thresh, arg);
-            smoothB = new FitsFile(filenameS, WCSkeynames);
+            smoothB = std::make_unique<FitsFile>(filenameS, WCSkeynames);
         }
         
         
@@ -798,10 +798,9 @@ int main (int argc, const char **argv)
         if(!monochrome) 
         {
             std::cout << "Creating colour PNGs of single objects with R = "+infilename+", G = "+greenfile+", B = "+bluefile+" ...\n";
-            FitsFile green (greenfile,WCSkeynames);
-            infile2 = green;
-            FitsFile blue(bluefile,WCSkeynames);
-            infile3 = blue;
+            
+            infile2 = std::move(FitsFile(greenfile,WCSkeynames));
+            infile3 = std::move(FitsFile(bluefile,WCSkeynames));
         }
         if (erd)
         {

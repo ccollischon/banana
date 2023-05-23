@@ -360,7 +360,7 @@ void erosionDilation(FitsFile& infile, int diameter)
         }
 }
 
-double sumOverSquares(FitsFile& image, int smooth)
+double sumOverSquares(const FitsFile& image, int smooth)
 { // Adding over all squares (smoothed) in image
     int stepsize = std::max(smooth / 6, 1);
 
